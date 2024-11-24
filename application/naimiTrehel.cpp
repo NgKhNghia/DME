@@ -20,7 +20,7 @@ void simulateNode(int nodeId) {
         std::this_thread::sleep_for(std::chrono::seconds(distrib(gen)));
         node.requestToken(); 
         {
-            logger.log("", nodeId, "enter cs");
+            logger.log("NOTI", nodeId, "enter cs");
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
         node.releaseToken();

@@ -1,0 +1,19 @@
+đối với các thuật toán sử dụng permisson-based:
+
+{"Date": 2024/10/30; "Time": 21:37:30; "Sender": 1; "Receiver": 2; "Timestamp": 3; "Content": REQUEST}
+{"Date": ...; "Time": ...; "Sender": ...; "Receiver": ...; "Timestamp": ...; "Content": }
+{"Date": ...; "Time": ...; "Sender": ...; "Receiver": ...; "Timestamp": ...; "Content": RELESAE}
+
+
+
+đối với các thuật toán sử dụng token-based
+
+{"Date": ...; "Time": ...; "Sender": ...; "Receiver": ...; "Token": NULL; "Content": CS}
+{"Date": ...; "Time": ...; "Sender": ...; "Receiver": ...; "Token": YES; "Content": NULL}
+{"Date": ...; "Time": ...; "Sender": ...; "Receiver": ...; "Token": ...; "Content": ...}
+
+
+{"Date": "2024-11-03", "Message": "TokenRing-Node 1 created", "Time": "01:32:07"}
+{"Date":"2024-11-03","Message":"Node 1 has the token","Time":"01:32:07"}
+{"Date":"2024-11-03","Message":"TokenRing-Node 3 created","Time":"01:32:07"}
+{"Date":"2024-11-03","Message":"TokenRing-Node 2 created","Time":"01:32:07"}

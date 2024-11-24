@@ -21,14 +21,14 @@ public:
     NaimiTrehel(int id, const std::string& ip, int port, std::shared_ptr<Comm<std::string>> comm) 
         : TokenBasedNode(id, ip, port, comm), last(1), next(-1), inCS(false) {
         token = (id == 1);
-        logger.log("INIT", id, "init");
+        logger.log("NOTI", id, "init");
     }   
 
     ~NaimiTrehel() {
         if (listenerThread.joinable()) {
             listenerThread.join();
         }
-        logger.log("DESTROY", id, "destroy");
+        logger.log("NOTI", id, "destroy");
     }
 
     void initialize() override {

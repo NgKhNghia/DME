@@ -138,7 +138,7 @@ public:
         std::unique_lock lock(fileMutex);
         json logData = {
             {"messageType", messageType},
-            {"duration", getElapsedDuration()},
+            {"durationMs", getElapsedDuration()},
             {"node", id},
             {"receiver", receiver},
             {"message", message}
@@ -152,7 +152,7 @@ public:
         std::unique_lock lock(fileMutex);
         json logData = {
             {"messageType", messageType},
-            {"duration", getElapsedDuration()},
+            {"durationMs", getElapsedDuration()},
             {"node", id},
             {"receiver", receiver},
             {"timeStamp", timeStamp},
@@ -167,7 +167,7 @@ public:
         std::unique_lock lock(fileMutex);
         json logData = {
             {"messageType", messageType},
-            {"duration", getElapsedDuration()},
+            {"durationMs", getElapsedDuration()},
             {"node", id},
             {"message", message}
         };
