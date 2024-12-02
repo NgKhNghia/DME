@@ -29,11 +29,12 @@ private:
 public:
     ErrorSimulator() : gen(rd()) {
         // Khởi tạo xác suất mặc định cho từng loại lỗi
-        errorProbabilities[NETWORK_DISCONNECT_RECOVERABLE] = 0.1;
-        errorProbabilities[NETWORK_DISCONNECT_NON_RECOVERABLE] = 0.01;
-        errorProbabilities[MESSAGE_LOSS] = 0.01;
-        errorProbabilities[MESSAGE_DELAY] = 0.15;
-        errorProbabilities[MESSAGE_MODIFIED] = 0.05;
+        // default = 0
+        errorProbabilities[NETWORK_DISCONNECT_RECOVERABLE] = 0;
+        errorProbabilities[NETWORK_DISCONNECT_NON_RECOVERABLE] = 0;
+        errorProbabilities[MESSAGE_LOSS] = 0;
+        errorProbabilities[MESSAGE_DELAY] = 0;
+        errorProbabilities[MESSAGE_MODIFIED] = 0;
     }
 
     // Đặt xác suất cho một loại lỗi

@@ -19,10 +19,10 @@ protected:
     int id;
     std::string ip;
     int port;
-    std::shared_ptr<Comm<std::string>> comm; 
+    std::shared_ptr<Comm> comm; 
 
 public:
-    Node(int id, const std::string &ip, int port, std::shared_ptr<Comm<std::string>> comm)
+    Node(int id, const std::string &ip, int port, std::shared_ptr<Comm> comm)
         : id(id), ip(ip), port(port), comm(comm) {}
     
     virtual ~Node() = default;
@@ -34,7 +34,7 @@ protected:
     bool token;
 
 public:
-    TokenBasedNode(int id, const std::string &ip, int port, std::shared_ptr<Comm<std::string>> comm)
+    TokenBasedNode(int id, const std::string &ip, int port, std::shared_ptr<Comm> comm)
         : Node(id, ip, port, comm), token(false) {}
 
     virtual ~TokenBasedNode() = default;
@@ -45,10 +45,12 @@ public:
 
 class PermissonBasedNode : public Node {
 public:
-    PermissonBasedNode(int id, const std::string &ip, int port, std::shared_ptr<Comm<std::string>> comm)
+    PermissonBasedNode(int id, const std::string &ip, int port, std::shared_ptr<Comm> comm)
         : Node(id, ip, port, comm) {}
 
     virtual ~PermissonBasedNode() = default;
+    virtual void requestPermission();
+    virtual void releasePermission();
 };
 
 #endif // NODE_H

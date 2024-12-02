@@ -23,7 +23,7 @@ extern Config config;
 extern Logger logger;
 extern ErrorSimulator error;
 
-template<typename MessageType>
+// template<typename MessageType>
 class Comm {
 private:
     int id;
@@ -32,7 +32,7 @@ private:
     struct sockaddr_in servaddr;
     std::mutex socketMutex;                      
     std::condition_variable messageAvailable;
-    std::queue<MessageType> messageQueue; 
+    std::queue<std::string> messageQueue; 
     std::thread m_receiveThread;
 
 public:
@@ -71,15 +71,18 @@ public:
         close(serverSocket);
     }
 
-    void send(int destId, const MessageType& message) {       
+    void send(int destId, const std::string& message) {       
         if (error.simulateNetworkError()) {
-            logger.log("ERROR", id, "NETWORK_DISCONNECT_RECOVERABLE");
+            logger.log(id, -1, -1, -1, "NETWORK_DISCONNECT_RECOVERABLE");
+            std::this_thread::sleep_for(std::chrono::seconds(5));
         }
         else if (error.simulateMessageLoss()) {
-            logger.log("ERROR", id, "MESSAGE_LOSS");
+            logger.log(id, -1, -1, -1, "MESSAGE_LOSS");
+            return;
         }
         else if (error.simulateMessageDelay()) {
-            logger.log("ERROR", id, "MESSAGE_DELAY");
+            logger.log(id, -1, -1, -1, "MESSAGE_DELAY");
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
         auto it = config.getNodeConfigs().find(destId);
@@ -108,29 +111,15 @@ public:
         close(clientSocket);
     }
 
-    int getMessage(MessageType& msg) {
+    int getMessage(std::string& msg) {
         std::unique_lock<std::mutex> lock(socketMutex);
         messageAvailable.wait(lock, [this]{ return !messageQueue.empty(); });
         
         if (messageQueue.empty()) { // loi
             return 0; 
         }
-        if (error.simulateMessageLoss()) {
-            logger.log("ERROR", id, "MESSAGE_LOSS");
-            messageQueue.pop();
-            return 0;
-        } 
-        else if (error.simulateMessageDelay()) {
-            logger.log("ERROR", id, "MESSAGE_DELAY");
-        } 
-
         msg = messageQueue.front();
         messageQueue.pop();
-
-        if (error.simulateMessageModified(msg)) {
-            logger.log("ERROR", id, "MESSAGE_MODIFIED");
-        }
-
         return 1;
     }
 
@@ -138,7 +127,6 @@ private:
     void receiveThread() {  
         while (1) {
             int clientSocket = accept(serverSocket, nullptr, nullptr);
-
             if (clientSocket >= 0) {
                 char buffer[1024] = {0};
                 int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
@@ -151,6 +139,7 @@ private:
                     {
                         std::lock_guard<std::mutex> lock(socketMutex);
                         messageQueue.emplace(std::string(buffer));
+                        logger.log(id, -1, id, -1, std::string(buffer));
                     }
                     messageAvailable.notify_one();
                 }

@@ -8,6 +8,7 @@
 class Config {
 private:
     int totalNodes;
+    std::string serverAddressMqtt;
     std::map<int, std::pair<std::string, int>> nodeConfigs; // cau hinh cho tung nut: id - ip - port
 
 public:
@@ -20,20 +21,24 @@ public:
         return totalNodes;
     }
 
-    std::string getNodeIp(int nodeId) const {
+    std::string getServerAddressMqtt() {
+        return serverAddressMqtt;
+    }
+
+    std::string getAddress(int nodeId) const {
         auto it = nodeConfigs.find(nodeId);
         if (it != nodeConfigs.end()) {
             return it->second.first;
         }
-        throw std::runtime_error("Node ID " + std::to_string(nodeId) + " not found");
+        throw std::runtime_error("Node " + std::to_string(nodeId) + " not found");
     }
 
-    int getNodePort(int nodeId) const {
+    int getPort(int nodeId) const {
         auto it = nodeConfigs.find(nodeId);
         if (it != nodeConfigs.end()) {
             return it->second.second;
         }
-        throw std::runtime_error("Node ID " + std::to_string(nodeId) + " not found");
+        throw std::runtime_error("Node " + std::to_string(nodeId) + " not found");
     }
 
     std::map<int, std::pair<std::string, int>> getNodeConfigs() { 
@@ -47,7 +52,7 @@ private:
             if (totalNodes <= 0) {
                 throw std::runtime_error("TOTAL_NODES must be greater than 0\n");
             }
-
+            serverAddressMqtt = dotenv::getenv("SERVER_ADDRESS_MQTT", "");
             for (int i = 1; i <= totalNodes; i++) {
                 std::string ip = dotenv::getenv(("NODE_" + std::to_string(i) + "_IP").c_str());
                 int port = std::stoi(dotenv::getenv(("NODE_" + std::to_string(i) + "_PORT").c_str()));
