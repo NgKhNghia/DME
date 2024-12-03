@@ -21,14 +21,14 @@ public:
     NaimiTrehel(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
         : TokenBasedNode(id, ip, port, comm), last(1), next(-1), inCS(false) {
         token = (id == 1);
-        logger.log(id, -1, -1, -1, "init");
+        logger.log(id, -1, -1, "init");
     }   
 
     ~NaimiTrehel() {
         if (listenerThread.joinable()) {
             listenerThread.join();
         }
-        logger.log(id, -1, -1, -1, "destroy");
+        logger.log(id, -1, -1, "destroy");
     }
 
     void initialize() override {
@@ -78,16 +78,16 @@ private:
         std::string message = "REQUEST " + std::to_string(requesterId);
         comm->send(destId, message);
         if (id == requesterId) {
-            logger.log(id, -1, destId, -1, "token request");
+            logger.log(id, destId, -1, "token request");
         } else {
-            logger.log(id, -1, destId, -1, "send token request for requester " + std::to_string(requesterId));
+            logger.log(id, destId, -1, "send token request for requester " + std::to_string(requesterId));
         }
     }
 
     void sendToken(int destId) {
         std::string message = "TOKEN " + std::to_string(id);
         comm->send(destId, message);
-        logger.log(id, -1, destId, -1, "send token to " + std::to_string(destId));
+        logger.log(id, destId, -1, "send token to " + std::to_string(destId));
     }
 
     void processMessage(const std::string& message) {
