@@ -73,15 +73,15 @@ public:
 
     void send(int destId, const std::string& message) {       
         if (error.simulateNetworkError()) {
-            logger.log(id, -1, -1, -1, "NETWORK_DISCONNECT_RECOVERABLE");
+            logger.log(id, -1, -1, "NETWORK_DISCONNECT_RECOVERABLE");
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
         else if (error.simulateMessageLoss()) {
-            logger.log(id, -1, -1, -1, "MESSAGE_LOSS");
+            logger.log(id, -1, -1, "MESSAGE_LOSS");
             return;
         }
         else if (error.simulateMessageDelay()) {
-            logger.log(id, -1, -1, -1, "MESSAGE_DELAY");
+            logger.log(id, -1, -1, "MESSAGE_DELAY");
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
@@ -139,7 +139,7 @@ private:
                     {
                         std::lock_guard<std::mutex> lock(socketMutex);
                         messageQueue.emplace(std::string(buffer));
-                        logger.log(id, -1, id, -1, std::string(buffer));
+                        logger.log(id, id, -1, std::string(buffer));
                     }
                     messageAvailable.notify_one();
                 }

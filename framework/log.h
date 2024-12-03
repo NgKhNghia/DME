@@ -31,7 +31,7 @@ public:
         startTime = std::chrono::steady_clock::now();
     }
     virtual void clean() {}
-    virtual void log(int id, int sender = -1, int receiver = -1, int timestamp = -1, const std::string &message = "") = 0;
+    virtual void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") = 0;
 
     std::string getTime() {
         auto now = std::chrono::steady_clock::now();
@@ -48,25 +48,20 @@ protected:
     std::mutex consoleMutex;
 
 public:
-    void log(int id, int sender = -1, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
+    void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
         std::unique_lock lock(consoleMutex);
         json data;
-        if (sender == -1 && receiver == -1) {
+        if (receiver == -1) {
             data["message_type"] = "notice";
-        } else if (sender == -1 && receiver == id) {
+        } else if (receiver == id) {
             data["message_type"] = "receive";
-        } else if (sender == -1 && receiver != -1) {
+        } else if (receiver != -1) {
             data["message_type"] = "send";
-        } else if (sender != -1 && receiver != -1) {
-            data["message_type"] = "self";
-        }
+        } 
         data["time_ms"] = getTime();
         data["id"] = id;
-        if (sender != -1) {
-            data["sender"] = sender;
-        }
         if (receiver != -1) {
-            data["receiver"] = receiver;
+            data["receiver"] = receiver; 
         }
         if (timestamp != -1) {
             data["timestamp"] = timestamp;
@@ -125,24 +120,19 @@ public:
         }
     }
 
-    void log(int id, int sender = -1, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
+    void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
         if (!file.is_open()) return;
         std::unique_lock lock(fileMutex);
         json data;
-        if (sender == -1 && receiver == -1) {
+        if (receiver == -1) {
             data["message_type"] = "notice";
-        } else if (sender == -1 && receiver == id) {
+        } else if (receiver == id) {
             data["message_type"] = "receive";
-        } else if (sender == -1 && receiver != -1) {
+        } else if (receiver != -1) {
             data["message_type"] = "send";
-        } else if (sender != -1 && receiver != -1) {
-            data["message_type"] = "self";
-        }
+        } 
         data["time_ms"] = getTime();
         data["id"] = id;
-        if (sender != -1) {
-            data["sender"] = sender;
-        }
         if (receiver != -1) {
             data["receiver"] = receiver;
         }
@@ -219,27 +209,22 @@ public:
 			MQTTClient_disconnect(client, 10000);
 	}
 
-	void log(int id, int sender = -1, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
+	void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
 		if (!MQTTClient_isConnected(client)) return;
 
 		MQTTClient_message pubmsg = MQTTClient_message_initializer;
 		MQTTClient_deliveryToken token;
 
         json data;
-        if (sender == -1 && receiver == -1) {
+        if (receiver == -1) {
             data["message_type"] = "notice";
-        } else if (sender == -1 && receiver == id) {
+        } else if (receiver == id) {
             data["message_type"] = "receive";
-        } else if (sender == -1 && receiver != -1) {
+        } else if (receiver != -1) {
             data["message_type"] = "send";
-        } else if (sender != -1 && receiver != -1) {
-            data["message_type"] = "self";
-        }
+        } 
         data["time_ms"] = getTime();
         data["id"] = id;
-        if (sender != -1) {
-            data["sender"] = sender;
-        }
         if (receiver != -1) {
             data["receiver"] = receiver;
         }
@@ -288,9 +273,9 @@ public:
         }
     }
 
-    void log(int id, int sender = -1, int receiver = -1, int timestamp = -1, const std::string &message = "") {
+    void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") {
         for (auto& m : methods) {
-            m->log(id, sender, receiver, timestamp, message);
+            m->log(id, receiver, timestamp, message);
         }
     }
 };
