@@ -1,7 +1,0 @@
-
-
-them messageType, time, nodeId, algorithmName
-co the viet lai ham log
-
-them mqtt, config them dia chi de gui mqtt
-gui them 1 tin nhan dac biet networkConfig chua toan bo thong tin cac node
