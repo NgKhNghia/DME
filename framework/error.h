@@ -11,8 +11,7 @@
 
 
 enum ErrorType {
-    NETWORK_DISCONNECT_RECOVERABLE,   // Mất kết nối mạng nhưng có thể khôi phục
-    NETWORK_DISCONNECT_NON_RECOVERABLE, // Mất kết nối mạng và không thể khôi phục
+    NETWORK_ERROR,   
     MESSAGE_LOSS,                     // Mất gói tin trên đường truyền
     MESSAGE_DELAY,                    // Trễ gói tin
     MESSAGE_MODIFIED                   // Gói tin đã bị thay đổi
@@ -30,8 +29,7 @@ public:
     ErrorSimulator() : gen(rd()) {
         // Khởi tạo xác suất mặc định cho từng loại lỗi
         // default = 0
-        errorProbabilities[NETWORK_DISCONNECT_RECOVERABLE] = 0;
-        errorProbabilities[NETWORK_DISCONNECT_NON_RECOVERABLE] = 0;
+        errorProbabilities[NETWORK_ERROR] = 0;
         errorProbabilities[MESSAGE_LOSS] = 0;
         errorProbabilities[MESSAGE_DELAY] = 0;
         errorProbabilities[MESSAGE_MODIFIED] = 0;
@@ -55,16 +53,10 @@ public:
 
     // Giả lập lỗi mất kết nối mạng
     bool simulateNetworkError() {
-        if (triggerError(NETWORK_DISCONNECT_RECOVERABLE)) {
+        if (triggerError(NETWORK_ERROR)) {
             std::this_thread::sleep_for(std::chrono::seconds(5));  // Tạm thời mất mạng
             return true;
         }
-        // else if (triggerError(NETWORK_DISCONNECT_NON_RECOVERABLE)) {
-        //     // isDisconnected = true;
-        //     // Không khôi phục được
-        //     // return true;
-
-        // }
         return false;
     }
 

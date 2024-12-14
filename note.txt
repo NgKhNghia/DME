@@ -1,8 +1,3 @@
-ve so do uml
-them tinh nang bat loi
-8h30 b1 thu3 03/12
-
-
-#TODO_LIST
-them tinh nang bat loi
-
+mo phong thuat toan naimi trehel ca 2 phien ban
+co mo phong loi
+bao cao nop truoc tet 

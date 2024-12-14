@@ -10,8 +10,8 @@
 #include "config.h"
 #include "log.h"
 
-extern Config config;
-extern Logger logger;
+// extern Config config;
+// extern Logger logger;
 
 
 class Node {

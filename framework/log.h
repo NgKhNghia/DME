@@ -4,41 +4,30 @@
 
 #include <iostream>
 #include <list>
-// #include <memory>
-// #include <string>
 #include <mutex>
 #include <condition_variable>
-// #include <thread>
-// #include <sstream>
-// #include <iomanip>
 #include <nlohmann/json.hpp>
-// #include <sys/file.h>
-// #include <unistd.h>
-// #include <chrono>
-#include "MQTTClient.h"
+#include "mqtt/async_client.h"
 
 typedef nlohmann::ordered_json json;
 
-extern Config config;
 
 class LoggingMethod {
 protected:
     std::chrono::steady_clock::time_point startTime;
 
 public:
-    virtual ~LoggingMethod() {}
+    ~LoggingMethod() = default;
     virtual void init() {
         startTime = std::chrono::steady_clock::now();
     }
     virtual void clean() {}
     virtual void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") = 0;
 
-    std::string getTime() {
+    int getTime() {
         auto now = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
-        std::ostringstream oss;
-        oss << duration;
-        return oss.str();
+        return static_cast<int>(duration);
     }
 
 };
@@ -74,7 +63,7 @@ public:
 class FileLoggingMethod : public LoggingMethod {
 protected:
     std::ofstream file;
-    std::list<json> queue;
+    std::queue<json> queue;
     bool closed = false;
     std::mutex fileMutex;
     std::condition_variable cond;
@@ -100,21 +89,24 @@ public:
                 auto& s = queue.front();
                 file.seekp(0, std::ios::end);
                 file << s.dump() << "\n\n";
-                queue.pop_front();
+                queue.pop();
             }
         } while (!closed);
     }
 
-    ~FileLoggingMethod() override {
-        closed = true;
-        cond.notify_all();
-        if (m_logFileThread.joinable()) {
-            m_logFileThread.join();
-        }
-        cond.notify_one();
+    ~FileLoggingMethod() {
+        clean();
     }
 
     void clean() override {
+        {
+            closed = true;
+            std::unique_lock<std::mutex> lock(fileMutex);
+        }
+        cond.notify_one();
+        if (m_logFileThread.joinable()) {
+            m_logFileThread.join();
+        }
         if (file.is_open()) {
             file.close();
         }
@@ -141,80 +133,45 @@ public:
         }
         data["message"] = message;
 
-        queue.push_back(data);
+        queue.push(data);
         cond.notify_one();
     }
 
 };
 
+
+
 class MqttLoggingMethod : public LoggingMethod {
-protected:
-    inline static const char* server_address = config.getServerAddressMqtt().c_str();	// 
-	inline static const char* client_id = "id";
-	inline static const char* topic = "log";
-	inline static long timeout = 10000L;
+private:
+    mqtt::async_client mqttClient;
+    mqtt::connect_options connOpts;
+    std::string topic = "test_dme";
+    std::queue<std::string> queue;
+    std::mutex mtx;
+    std::condition_variable cond;
+    std::thread mqttThread;
+    bool stop = false;
 
-	MQTTClient client;
 public:
-    MqttLoggingMethod() {
-        MQTTClient_global_init(NULL);
+    // note: do dai cua client_id phai lon hon 1, qua ngan se khong ket noi duoc
+    MqttLoggingMethod(int id) : mqttClient(config.getBrokerAddressMqtt(), "mqtt_pubishler_" + std::to_string(id)) {}
+    // MqttLoggingMethod(int id) : mqttClient("tcp://test.mosquitto.org:1883", "mqtt_cpp_publisher") {}
 
-		int rc = MQTTClient_create(&client, server_address, client_id, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-		if (rc != MQTTCLIENT_SUCCESS) {
-			std::cout << "Failed to connect to MQTT server, return code " << rc << std::endl;
-			return;
-		}
-    }
 
     ~MqttLoggingMethod() {
-		MQTTClient_destroy(&client);
-	}
+        clean();
+    }
 
     void init() override {
-		if (MQTTClient_isConnected(client)) return;
-		MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-		conn_opts.keepAliveInterval = 20;
-		conn_opts.cleansession = 1;
-		int rc = MQTTClient_connect(client, &conn_opts);
-		if (rc != MQTTCLIENT_SUCCESS) {
-			std::cout << "Failed to connect to MQTT server, return code " << rc << std::endl;
-			return;
-		} 
+        LoggingMethod::init();
+        connOpts.set_keep_alive_interval(60);
+        connOpts.set_clean_session(true);
+        mqttClient.connect(connOpts)->wait();
 
-        // special message
-        MQTTClient_message pubmsg = MQTTClient_message_initializer;
-		MQTTClient_deliveryToken token;
+        mqttThread = std::thread(&MqttLoggingMethod::processLogs, this);
+    }
 
-        json data = json::array();
-        int totalNodes = config.getTotalNodes();
-        std::map<int, std::pair<std::string, int>> table = config.getNodeConfigs();
-        data["total_nodes"] = totalNodes;
-        for (int i = 1; i <= totalNodes; i++) {
-            json obj;
-            obj["id"] = i;
-            obj["address"] = table[i].first;
-            obj["port"] = table[i].second;
-            data.push_back(obj);
-        }
-		pubmsg.payload = (void*)data.dump().c_str();
-		pubmsg.payloadlen = data.dump().length();
-		pubmsg.qos = 1; // QOS
-		pubmsg.retained = 0;
-		MQTTClient_publishMessage(client, topic, &pubmsg, &token);
-		MQTTClient_waitForCompletion(client, token, timeout);
-	}
-
-    void clean() override {
-		if (MQTTClient_isConnected(client))
-			MQTTClient_disconnect(client, 10000);
-	}
-
-	void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
-		if (!MQTTClient_isConnected(client)) return;
-
-		MQTTClient_message pubmsg = MQTTClient_message_initializer;
-		MQTTClient_deliveryToken token;
-
+    void log(int id, int receiver = -1, int timestamp = -1, const std::string &message = "") override {
         json data;
         if (receiver == -1) {
             data["message_type"] = "notice";
@@ -222,7 +179,8 @@ public:
             data["message_type"] = "receive";
         } else if (receiver != -1) {
             data["message_type"] = "send";
-        } 
+        }
+
         data["time_ms"] = getTime();
         data["id"] = id;
         if (receiver != -1) {
@@ -232,25 +190,56 @@ public:
             data["timestamp"] = timestamp;
         }
         data["message"] = message;
+        std::string logMessage = data.dump();
 
-		pubmsg.payload = (void*)data.dump().c_str();
-		pubmsg.payloadlen = data.dump().length();
-		pubmsg.qos = 1; // QOS
-		pubmsg.retained = 0;
-		MQTTClient_publishMessage(client, topic, &pubmsg, &token);
-		MQTTClient_waitForCompletion(client, token, timeout);
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            queue.push(logMessage);
+        }
+        cond.notify_one();
+    }
+
+    void processLogs() {
+        while (true) {
+            std::string logMessage;
+            {
+                std::unique_lock<std::mutex> lock(mtx);
+                cond.wait(lock, [this]() { return !queue.empty() || stop; });
+                if (stop && queue.empty()) {
+                    break;
+                }
+                logMessage = queue.front();
+                queue.pop();
+            }
+            mqtt::message_ptr pubmsg = mqtt::make_message(topic, logMessage);
+            pubmsg->set_qos(1);
+            mqttClient.publish(pubmsg)->wait();
+        }
+    }
+
+    void clean() override {
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            stop = true;
+        }
+        cond.notify_one();
+        if (mqttThread.joinable()) {
+            mqttThread.join();
+        }
+        mqttClient.disconnect()->wait();
     }
 };
 
 class Logger {
 protected:
+    int id;
     bool toConsole;
     bool toFile;
     bool toMqtt;
     std::list<std::shared_ptr<LoggingMethod>> methods;
 
 public:
-    Logger(bool console, bool file, bool mqtt) : toConsole(console), toFile(file), toMqtt(mqtt) {
+    Logger(int id, bool console, bool file, bool mqtt) : id(id), toConsole(console), toFile(file), toMqtt(mqtt) {
         init();
     }
 
@@ -263,7 +252,7 @@ public:
     void init() {
         if (toConsole) methods.push_back(std::make_shared<ConsoleLoggingMethod>());
         if (toFile) methods.push_back(std::make_shared<FileLoggingMethod>());
-        if (toMqtt) methods.push_back(std::make_shared<MqttLoggingMethod>());
+        if (toMqtt) methods.push_back(std::make_shared<MqttLoggingMethod>(id));
         reset();
     }
 
@@ -280,7 +269,6 @@ public:
     }
 };
 
-extern Logger logger;
 
 
 

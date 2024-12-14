@@ -8,7 +8,7 @@
 class Config {
 private:
     int totalNodes;
-    std::string serverAddressMqtt;
+    std::string brokerAddress;
     std::map<int, std::pair<std::string, int>> nodeConfigs; // cau hinh cho tung nut: id - ip - port
 
 public:
@@ -21,8 +21,8 @@ public:
         return totalNodes;
     }
 
-    std::string getServerAddressMqtt() {
-        return serverAddressMqtt;
+    std::string getBrokerAddressMqtt() {
+        return brokerAddress;
     }
 
     std::string getAddress(int nodeId) const {
@@ -52,7 +52,7 @@ private:
             if (totalNodes <= 0) {
                 throw std::runtime_error("TOTAL_NODES must be greater than 0\n");
             }
-            serverAddressMqtt = dotenv::getenv("SERVER_ADDRESS_MQTT", "");
+            brokerAddress = dotenv::getenv("BROKER_ADDRESS_MQTT", "tcp://localhost:1883");
             for (int i = 1; i <= totalNodes; i++) {
                 std::string ip = dotenv::getenv(("NODE_" + std::to_string(i) + "_IP").c_str());
                 int port = std::stoi(dotenv::getenv(("NODE_" + std::to_string(i) + "_PORT").c_str()));
