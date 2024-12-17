@@ -10,10 +10,6 @@
 #include "config.h"
 #include "log.h"
 
-// extern Config config;
-// extern Logger logger;
-
-
 class Node {
 protected:
     int id;
@@ -31,11 +27,11 @@ public:
 
 class TokenBasedNode : public Node {
 protected:
-    bool token;
+    bool hasToken;
 
 public:
     TokenBasedNode(int id, const std::string &ip, int port, std::shared_ptr<Comm> comm)
-        : Node(id, ip, port, comm), token(false) {}
+        : Node(id, ip, port, comm), hasToken(false) {}
 
     virtual ~TokenBasedNode() = default;
     virtual void requestToken() = 0; 

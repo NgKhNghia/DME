@@ -19,11 +19,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-// extern Config config;
 extern Logger *logger;
 extern ErrorSimulator error;
 
-// template<typename MessageType>
 class Comm {
 private:
     int id;
@@ -74,14 +72,12 @@ public:
     void send(int destId, const std::string& message) {       
         if (error.simulateNetworkError()) {
             std::this_thread::sleep_for(std::chrono::seconds(3));
-            logger->log(id, -1, -1, "NETWORK_ERROR");
+            logger->log(id, -1, "NETWORK_ERROR");
         }
         else if (error.simulateMessageLoss()) {
-            // logger.log(id, -1, -1, "MESSAGE_LOSS");
             return;
         }
         else if (error.simulateMessageDelay()) {
-            // logger.log(id, -1, -1, "MESSAGE_DELAY");
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
@@ -94,7 +90,6 @@ public:
         int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (clientSocket < 0) {
             close(clientSocket);
-            // throw std::runtime_error("Failed to create client socket");
             return;
         }
         sockaddr_in destIp;
@@ -103,14 +98,13 @@ public:
         inet_pton(AF_INET, it->second.first.c_str(), &destIp.sin_addr);
         if (connect(clientSocket, (struct sockaddr*)&destIp, sizeof(destIp)) < 0) {
             close(clientSocket);
-            // throw std::runtime_error("Failed to connect to destination");
             return;
         }
         if (::send(clientSocket, message.c_str(), message.size(), 0) < 0) {
             close(clientSocket);
-            // throw std::runtime_error("Failed to send message");
             return;
         }
+        // logger->log(id, destId, message);
         close(clientSocket);
     }
 
@@ -118,7 +112,7 @@ public:
         std::unique_lock<std::mutex> lock(socketMutex);
         messageAvailable.wait(lock, [this]{ return !messageQueue.empty(); });
         
-        if (messageQueue.empty()) { // loi
+        if (messageQueue.empty()) {
             return 0; 
         }
         msg = messageQueue.front();
@@ -142,7 +136,7 @@ private:
                     {
                         std::lock_guard<std::mutex> lock(socketMutex);
                         messageQueue.emplace(std::string(buffer));
-                        logger->log(id, id, -1, std::string(buffer));
+                        logger->log(id, id, std::string(buffer));
                     }
                     messageAvailable.notify_one();
                 }

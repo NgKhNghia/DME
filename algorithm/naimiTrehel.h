@@ -13,22 +13,23 @@ private:
     int last;
     int next;
     bool inCS;
+    bool nextUpdate;     // kiem tra xem co node nao moi request hay khong
     std::mutex mtx;
     std::condition_variable cv;
     std::thread listenerThread;
 
 public:
     NaimiTrehel(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
-        : TokenBasedNode(id, ip, port, comm), last(1), next(-1), inCS(false) {
-        token = (id == 1);
-        logger->log(id, -1, -1, "init");
+        : TokenBasedNode(id, ip, port, comm), last(1), next(-1), inCS(false), nextUpdate(false) {
+        hasToken = (id == 1);
+        logger->log(id, -1, "init");
     }   
 
     ~NaimiTrehel() {
         if (listenerThread.joinable()) {
             listenerThread.join();
         }
-        logger->log(id, -1, -1, "destroy");
+        logger->log(id, -1, "destroy");
     }
 
     void initialize() override {
@@ -37,57 +38,58 @@ public:
 
     void requestToken() override {
         std::unique_lock<std::mutex> lock(mtx);
-        if (!token) {
+        if (!hasToken) {
             sendRequest(last, id);
             last = id;
-            cv.wait(lock, [this] { return token; });
+            cv.wait(lock, [this] { return hasToken; });
         }
         inCS = true;
     }
 
     void releaseToken() override {
         inCS = false;
-        if (next != -1) {
+        if (nextUpdate) {
             sendToken(next);
-            token = false;
-            next = -1;
+            hasToken = false;
+            nextUpdate = false;
         }
     }
 
+private:
     void receiveRequest(int requesterId) {
         std::unique_lock<std::mutex> lock(mtx);
         if (last != id) {
             sendRequest(last, requesterId);
-        } else if (token && !inCS) {
+        } else if (hasToken && !inCS) {
             sendToken(requesterId);
-            token = false;
+            hasToken = false;
         } else {
             next = requesterId;
+            nextUpdate = true;
         }
         last = requesterId;
     }
 
     void receiveToken() {
         std::unique_lock<std::mutex> lock(mtx);
-        token = true;
+        hasToken = true;
         cv.notify_one();
     }
 
-private:
     void sendRequest(int destId, int requesterId) {
         std::string message = "REQUEST " + std::to_string(requesterId);
         comm->send(destId, message);
         if (id == requesterId) {
-            logger->log(id, destId, -1, "token request");
+            logger->log(id, destId, "token request");
         } else {
-            logger->log(id, destId, -1, "send token request for requester " + std::to_string(requesterId));
+            logger->log(id, destId, "send token request for requester " + std::to_string(requesterId));
         }
     }
 
     void sendToken(int destId) {
         std::string message = "TOKEN " + std::to_string(id);
         comm->send(destId, message);
-        logger->log(id, destId, -1, "send token to " + std::to_string(destId));
+        logger->log(id, destId, "send token to " + std::to_string(destId));
     }
 
     void processMessage(const std::string& message) {
@@ -103,7 +105,6 @@ private:
         }
     }
 
-public:
     void listenForMessages() {
         while (true) {
             std::string message;

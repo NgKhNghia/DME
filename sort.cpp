@@ -43,7 +43,7 @@ int main() {
 
     // Ghi lại các dòng đã sắp xếp vào file mới
     for (const auto& log : logs) {
-        output << log.dump() << endl;
+        output << log.dump() << std::endl << endl;
     }
 
     // cout << "Logs đã được sắp xếp và ghi vào file sorted_log.txt" << endl;

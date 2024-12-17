@@ -1,0 +1,160 @@
+{"message_type":"notice","time_ms":11,"id":3,"message":"init"}
+
+{"message_type":"notice","time_ms":111,"id":1,"message":"init"}
+
+{"message_type":"notice","time_ms":111,"id":2,"message":"init"}
+
+{"message_type":"send","time_ms":1011,"id":3,"receiver":1,"message":"request token"}
+
+{"message_type":"receive","time_ms":1012,"id":3,"receiver":3,"message":"TOKEN 1"}
+
+{"message_type":"notice","time_ms":1012,"id":3,"message":"enter cs"}
+
+{"message_type":"receive","time_ms":1013,"id":1,"receiver":1,"message":"REQUEST 3"}
+
+{"message_type":"send","time_ms":1014,"id":1,"receiver":3,"message":"send token to 3"}
+
+{"message_type":"receive","time_ms":1109,"id":3,"receiver":3,"message":"REQUEST 1"}
+
+{"message_type":"send","time_ms":1111,"id":1,"receiver":3,"message":"request token"}
+
+{"message_type":"send","time_ms":2012,"id":3,"receiver":1,"message":"send token to 1"}
+
+{"message_type":"receive","time_ms":2014,"id":1,"receiver":1,"message":"TOKEN 3"}
+
+{"message_type":"notice","time_ms":2015,"id":1,"message":"enter cs"}
+
+{"message_type":"send","time_ms":3013,"id":3,"receiver":1,"message":"request token"}
+
+{"message_type":"receive","time_ms":3013,"id":3,"receiver":3,"message":"TOKEN 1"}
+
+{"message_type":"notice","time_ms":3013,"id":3,"message":"enter cs"}
+
+{"message_type":"receive","time_ms":3015,"id":1,"receiver":1,"message":"REQUEST 3"}
+
+{"message_type":"send","time_ms":3015,"id":1,"receiver":3,"message":"send token to 3"}
+
+{"message_type":"receive","time_ms":4110,"id":3,"receiver":3,"message":"REQUEST 2"}
+
+{"message_type":"send","time_ms":4111,"id":3,"receiver":2,"message":"send token to 2"}
+
+{"message_type":"send","time_ms":4111,"id":2,"receiver":1,"message":"request token"}
+
+{"message_type":"receive","time_ms":4112,"id":2,"receiver":2,"message":"TOKEN 3"}
+
+{"message_type":"receive","time_ms":4112,"id":1,"receiver":1,"message":"REQUEST 2"}
+
+{"message_type":"notice","time_ms":4112,"id":2,"message":"enter cs"}
+
+{"message_type":"send","time_ms":4113,"id":1,"receiver":3,"message":"send token request for requester 2"}
+
+{"message_type":"receive","time_ms":8014,"id":2,"receiver":2,"message":"REQUEST 1"}
+
+{"message_type":"send","time_ms":8014,"id":3,"receiver":2,"message":"request token"}
+
+{"message_type":"send","time_ms":8015,"id":1,"receiver":2,"message":"request token"}
+
+{"message_type":"send","time_ms":8015,"id":2,"receiver":1,"message":"send token to 1"}
+
+{"message_type":"receive","time_ms":8015,"id":2,"receiver":2,"message":"REQUEST 3"}
+
+{"message_type":"send","time_ms":8016,"id":2,"receiver":1,"message":"send token request for requester 3"}
+
+{"message_type":"notice","time_ms":8016,"id":1,"message":"enter cs"}
+
+{"message_type":"receive","time_ms":8016,"id":1,"receiver":1,"message":"TOKEN 2"}
+
+{"message_type":"receive","time_ms":8017,"id":1,"receiver":1,"message":"REQUEST 3"}
+
+{"message_type":"receive","time_ms":8112,"id":3,"receiver":3,"message":"REQUEST 2"}
+
+{"message_type":"send","time_ms":8113,"id":2,"receiver":3,"message":"request token"}
+
+{"message_type":"receive","time_ms":9014,"id":3,"receiver":3,"message":"TOKEN 1"}
+
+{"message_type":"notice","time_ms":9014,"id":3,"message":"enter cs"}
+
+{"message_type":"send","time_ms":9017,"id":1,"receiver":3,"message":"send token to 3"}
+
+{"message_type":"notice","time_ms":10015,"id":3,"message":"Node 3 simulation stopped after 5 seconds"}
+
+{"message_type":"send","time_ms":10015,"id":3,"receiver":2,"message":"send token to 2"}
+
+{"message_type":"receive","time_ms":10016,"id":2,"receiver":2,"message":"TOKEN 3"}
+
+{"message_type":"notice","time_ms":10016,"id":2,"message":"enter cs"}
+
+{"message_type":"receive","time_ms":12015,"id":3,"receiver":3,"message":"REQUEST 1"}
+
+{"message_type":"receive","time_ms":12016,"id":2,"receiver":2,"message":"REQUEST 1"}
+
+{"message_type":"send","time_ms":12017,"id":1,"receiver":3,"message":"request token"}
+
+{"message_type":"send","time_ms":12017,"id":2,"receiver":1,"message":"send token to 1"}
+
+{"message_type":"receive","time_ms":12018,"id":1,"receiver":1,"message":"TOKEN 2"}
+
+{"message_type":"notice","time_ms":12018,"id":1,"message":"enter cs"}
+
+{"message_type":"notice","time_ms":15019,"id":1,"message":"enter cs"}
+
+{"message_type":"send","time_ms":16017,"id":2,"receiver":1,"message":"request token"}
+
+{"message_type":"receive","time_ms":16018,"id":1,"receiver":1,"message":"REQUEST 2"}
+
+{"message_type":"receive","time_ms":16018,"id":2,"receiver":2,"message":"REQUEST 1"}
+
+{"message_type":"notice","time_ms":16018,"id":2,"message":"enter cs"}
+
+{"message_type":"receive","time_ms":16018,"id":2,"receiver":2,"message":"TOKEN 1"}
+
+{"message_type":"send","time_ms":16019,"id":1,"receiver":2,"message":"send token to 2"}
+
+{"message_type":"send","time_ms":16019,"id":1,"receiver":2,"message":"request token"}
+
+{"message_type":"send","time_ms":17019,"id":2,"receiver":1,"message":"send token to 1"}
+
+{"message_type":"receive","time_ms":17020,"id":1,"receiver":1,"message":"TOKEN 2"}
+
+{"message_type":"notice","time_ms":17020,"id":1,"message":"enter cs"}
+
+{"message_type":"notice","time_ms":19021,"id":1,"message":"enter cs"}
+
+{"message_type":"send","time_ms":21019,"id":2,"receiver":1,"message":"request token"}
+
+{"message_type":"receive","time_ms":21020,"id":1,"receiver":1,"message":"REQUEST 2"}
+
+{"message_type":"receive","time_ms":21020,"id":2,"receiver":2,"message":"TOKEN 1"}
+
+{"message_type":"notice","time_ms":21020,"id":2,"message":"enter cs"}
+
+{"message_type":"send","time_ms":21021,"id":1,"receiver":2,"message":"send token to 2"}
+
+{"message_type":"notice","time_ms":23020,"id":2,"message":"enter cs"}
+
+{"message_type":"receive","time_ms":25020,"id":2,"receiver":2,"message":"REQUEST 1"}
+
+{"message_type":"send","time_ms":25021,"id":1,"receiver":2,"message":"request token"}
+
+{"message_type":"send","time_ms":25021,"id":2,"receiver":1,"message":"send token to 1"}
+
+{"message_type":"send","time_ms":25021,"id":2,"receiver":1,"message":"request token"}
+
+{"message_type":"receive","time_ms":25022,"id":1,"receiver":1,"message":"TOKEN 2"}
+
+{"message_type":"notice","time_ms":25022,"id":1,"message":"enter cs"}
+
+{"message_type":"receive","time_ms":25022,"id":1,"receiver":1,"message":"REQUEST 2"}
+
+{"message_type":"receive","time_ms":26022,"id":2,"receiver":2,"message":"TOKEN 1"}
+
+{"message_type":"notice","time_ms":26022,"id":2,"message":"enter cs"}
+
+{"message_type":"send","time_ms":26023,"id":1,"receiver":2,"message":"send token to 2"}
+
+{"message_type":"receive","time_ms":27022,"id":2,"receiver":2,"message":"REQUEST 1"}
+
+{"message_type":"send","time_ms":27023,"id":1,"receiver":2,"message":"request token"}
+
+{"message_type":"receive","time_ms":27024,"id":1,"receiver":1,"message":"TOKEN 2"}
+

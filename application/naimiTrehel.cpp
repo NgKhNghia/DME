@@ -16,14 +16,24 @@ void simulateNode(int nodeId) {
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(0, 5);
+    std::uniform_int_distribution<> distrib(10, 20);
+
+    auto startTime = std::chrono::steady_clock::now(); 
 
     while (true) {
+        // if (nodeId == 3) {
+        //     auto currentTime = std::chrono::steady_clock::now();
+        //     if (std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count() >= 5) {
+        //         logger->log(nodeId, -1, "Node 3 simulation stopped after 5 seconds");
+        //         break;
+        //     }
+        // }
+
         std::this_thread::sleep_for(std::chrono::seconds(distrib(gen)));
         node.requestToken(); 
         {
-            logger->log(nodeId, -1, -1, "enter cs");
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            logger->log(nodeId, -1, "enter cs");
+            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
         node.releaseToken();
     }
