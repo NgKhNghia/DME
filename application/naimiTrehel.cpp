@@ -1,4 +1,4 @@
-#include "naimiTrehel.h"
+#include "naimiTrehel_v2.h"
 #include <random>
 
 Config config;
@@ -16,15 +16,15 @@ void simulateNode(int nodeId) {
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(10, 20);
+    std::uniform_int_distribution<> distrib(3, 5);
 
     auto startTime = std::chrono::steady_clock::now(); 
 
     while (true) {
         // if (nodeId == 3) {
         //     auto currentTime = std::chrono::steady_clock::now();
-        //     if (std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count() >= 5) {
-        //         logger->log(nodeId, -1, "Node 3 simulation stopped after 5 seconds");
+        //     if (std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count() >= 30) {
+        //         logger->log(nodeId, -1, "Node 3 simulation stopped after 30 seconds");
         //         break;
         //     }
         // }

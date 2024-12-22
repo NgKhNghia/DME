@@ -27,7 +27,7 @@ protected:
 public:
     void log(int id, int receiver = -1, const std::string &message = "") override {
         std::unique_lock lock(consoleMutex);
-        std::cout << message << "\n\n";
+        std::cout << message << "\n";
     }
 };
 
@@ -59,7 +59,7 @@ public:
             while (!queue.empty()) {
                 auto& s = queue.front();
                 file.seekp(0, std::ios::end);
-                file << s << "\n\n";
+                file << s << "\n";
                 queue.pop();
             }
         } while (!closed);

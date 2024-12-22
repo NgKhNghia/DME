@@ -29,7 +29,7 @@ for param in "${params[@]}"; do
     ./application/naimiTrehel "$param" &
 
     pids+=("$!")  
-    sleep 0.000001 
+    # sleep 0.000001 
 done
 
 wait

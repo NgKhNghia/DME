@@ -2,11 +2,10 @@
     "configurations": [
       {
         "name": "Linux",
-        "includePath": ["${workspaceFolder}/**",
-                "/usr/include"
-                // "/usr/include/mqtt",
-                // "/usr/include/paho-mqttpp3"
-              ],
+        "includePath": [
+          "${workspaceFolder}/**",
+          "/usr/include"
+        ],
         "defines": [],
         "compilerPath": "/usr/bin/g++",
         "cStandard": "c11",

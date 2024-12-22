@@ -72,7 +72,7 @@ public:
     void send(int destId, const std::string& message) {       
         if (error.simulateNetworkError()) {
             std::this_thread::sleep_for(std::chrono::seconds(3));
-            logger->log(id, -1, "NETWORK_ERROR");
+            // logger->log(id, -1, "NETWORK_ERROR");
         }
         else if (error.simulateMessageLoss()) {
             return;
@@ -136,7 +136,7 @@ private:
                     {
                         std::lock_guard<std::mutex> lock(socketMutex);
                         messageQueue.emplace(std::string(buffer));
-                        logger->log(id, id, std::string(buffer));
+                        // logger->log(id, id, std::string(buffer));
                     }
                     messageAvailable.notify_one();
                 }

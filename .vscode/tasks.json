@@ -11,7 +11,8 @@
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-lpthread",
-                "-Iframework -Ialgorithm",
+                "-lpaho-mqttpp3",
+                "-lpaho-mqtt3a",
             ],
             "options": {
                 "cwd": "${fileDirname}"
