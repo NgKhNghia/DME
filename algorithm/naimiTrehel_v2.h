@@ -23,8 +23,8 @@ private:
     std::condition_variable cv;
     std::thread listenerThread;
 
-    const std::chrono::seconds T_wait{10};
-    const std::chrono::seconds T_elec{10};
+    const std::chrono::seconds T_wait{5};
+    const std::chrono::seconds T_elec{5};
 
 public:
     NaimiTrehel(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
@@ -128,10 +128,6 @@ private:
     void sendConsult() { 
         {
             std::unique_lock<std::mutex> lock(mtx);
-            // if (hasToken || intoCS) {
-            //     return; 
-            // }   
-
             hasRespond = false;
             for (int i = 1; i <= config.getTotalNodes(); i++) {
                 if (i != id) {
@@ -151,10 +147,6 @@ private:
     void sendFailure() {
         {
             std::unique_lock<std::mutex> lock(mtx);
-            // if (hasToken || intoCS) {
-            //     return; 
-            // } 
-            
             hasExsit = false;
             for (int i = 1; i <= config.getTotalNodes(); i++) {
                 if (i != id) {
@@ -174,10 +166,6 @@ private:
     void sendElection() {
         {
             std::unique_lock<std::mutex> lock(mtx);
-            // if (hasToken || intoCS) {
-            //     return; 
-            // } 
-
             electedId[id] = true;
             for (int i = 1; i <= config.getTotalNodes(); i++) {
                 if (i != id) {
@@ -218,10 +206,6 @@ private:
         }
     }
 
-
-
-
-
     void receiveToken(int senderID) {
         std::unique_lock<std::mutex> lock(mtx);
         hasToken = true;
@@ -245,7 +229,6 @@ private:
     }
 
     void receiveConsult(int senderId) {
-        // logger->log(id, id, std::to_string(id) + " received CONSULT from " + std::to_string(senderId));
         if (next == senderId) {
             comm->send(senderId, "RESPOND " + std::to_string(id));
             logger->log(id, senderId, std::to_string(id) + " send RESPOND to " + std::to_string(senderId));
@@ -281,21 +264,18 @@ private:
 
     void receiveElected(int senderId) {
         logger->log(id, id, std::to_string(id) + " received ELECTED from " + std::to_string(senderId));
-        // bool tmpRequest = hasRequest;
         {
             std::unique_lock<std::mutex> lock(mtx);
             next = -1;
             last = senderId;
             hasRequest = false;
             hasToken = false;
-            // intoCS = false;
             hasRespond = false;
             hasExsit = false;
             stopExtension = true;
             electedId.clear();
             cv.notify_all();
         }
-        // if (tmpRequest) requestToken();
     }
 
 

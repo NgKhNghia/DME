@@ -54,7 +54,7 @@ public:
     // Giả lập lỗi mất kết nối mạng
     bool simulateNetworkError() {
         if (triggerError(NETWORK_ERROR)) {
-            std::this_thread::sleep_for(std::chrono::seconds(5));  // Tạm thời mất mạng
+            std::this_thread::sleep_for(std::chrono::seconds(20));  // Tạm thời mất mạng
             return true;
         }
         return false;

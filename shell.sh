@@ -15,7 +15,7 @@ trap 'kill ${pids[@]}; exit' SIGINT
 # g++ application/tokenRing.cpp -o application/tokenRing -lpthread -Iframework -Ialgorithm -no-pie
 g++ application/naimiTrehel.cpp -o application/naimiTrehel -lpaho-mqttpp3 -lpaho-mqtt3a -lpthread -Iframework -Ialgorithm
 
-num_params=${1:-3}
+num_params=${1:-10}
 params=()
 pids=()  
 
