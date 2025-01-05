@@ -8,13 +8,13 @@
 #include <condition_variable>
 #include <thread>
 
-class NaimiTrehel : public TokenBasedNode {
+class NaimiTrehelV2 : public TokenBasedNode {
 private:   
     int last;                           // node cuoi cung se truy cap CS
     int next;                           // node tiep theo se truy cap CS
     bool nextUpdate;                    // kiem tra xem co node nao moi request hay khong
     bool hasRequest;                    // da gui yeu cau hay chua
-    bool intoCS;                          // co the vao hoac dang trong CS 
+    bool intoCS;                        // co the vao hoac dang trong CS 
     bool hasRespond;                    // da nhan duoc phan hoi sau khi gui CONSULT
     bool hasExsit;                      // da nhan duoc phan hoi sau khi gui EXSIT
     bool stopExtension;                 // dung gui CONSULT...
@@ -27,13 +27,13 @@ private:
     const std::chrono::seconds T_elec{5};
 
 public:
-    NaimiTrehel(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
+    NaimiTrehelV2(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
         : TokenBasedNode(id, ip, port, comm), last(1), next(-1), intoCS(false), nextUpdate(false), stopExtension(false) {
         hasToken = (id == 1);
         logger->log(id, -1, "init");
     }   
 
-    ~NaimiTrehel() {
+    ~NaimiTrehelV2() {
         if (listenerThread.joinable()) {
             listenerThread.join();
         }
@@ -41,7 +41,7 @@ public:
     }
 
     void initialize() override {
-        listenerThread = std::thread(&NaimiTrehel::listenForMessages, this);
+        listenerThread = std::thread(&NaimiTrehelV2::listenForMessages, this);
     }
 
     void requestToken() override {

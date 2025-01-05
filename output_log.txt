@@ -1,43 +1,101 @@
-{"message_type":"notice","time_ms":12,"id":2,"message":"init"}
-{"message_type":"notice","time_ms":12,"id":1,"message":"init"}
-{"message_type":"notice","time_ms":12,"id":3,"message":"init"}
-{"message_type":"notice","time_ms":4012,"id":1,"message":"enter cs"}
-{"message_type":"send","time_ms":5012,"id":3,"receiver":1,"message":"3 request token"}
-{"message_type":"send","time_ms":5013,"id":2,"receiver":1,"message":"2 request token"}
-{"message_type":"receive","time_ms":5425,"id":1,"receiver":1,"message":"REQUEST 2"}
-{"message_type":"receive","time_ms":5600,"id":2,"receiver":2,"message":"TOKEN 1"}
-{"message_type":"notice","time_ms":5601,"id":2,"message":"enter cs"}
-{"message_type":"send","time_ms":6013,"id":1,"receiver":2,"message":"1 send token to 2"}
-{"message_type":"receive","time_ms":6166,"id":3,"receiver":3,"message":"TOKEN 2"}
-{"message_type":"receive","time_ms":10603,"id":2,"receiver":2,"message":"REQUEST 1"}
-{"message_type":"send","time_ms":10604,"id":2,"receiver":1,"message":"2 send token to 1"}
-{"message_type":"send","time_ms":11015,"id":1,"receiver":2,"message":"1 request token"}
-{"message_type":"receive","time_ms":11016,"id":1,"receiver":1,"message":"TOKEN 2"}
-{"message_type":"notice","time_ms":11016,"id":1,"message":"enter cs"}
-{"message_type":"send","time_ms":12601,"id":2,"receiver":1,"message":"2 request token"}
-{"message_type":"receive","time_ms":12604,"id":2,"receiver":2,"message":"TOKEN 1"}
-{"message_type":"notice","time_ms":12604,"id":2,"message":"enter cs"}
-{"message_type":"receive","time_ms":13013,"id":1,"receiver":1,"message":"REQUEST 2"}
-{"message_type":"send","time_ms":13016,"id":1,"receiver":2,"message":"1 send token to 2"}
-{"message_type":"receive","time_ms":13451,"id":2,"receiver":2,"message":"REQUEST 3"}
-{"message_type":"receive","time_ms":13863,"id":1,"receiver":1,"message":"REQUEST 3"}
-{"message_type":"send","time_ms":13864,"id":1,"receiver":2,"message":"1 send token request to 2 for 3"}
-{"message_type":"send","time_ms":14604,"id":2,"receiver":3,"message":"2 send token to 3"}
-{"message_type":"send","time_ms":16017,"id":1,"receiver":3,"message":"1 request token"}
-{"message_type":"send","time_ms":17605,"id":2,"receiver":3,"message":"2 request token"}
-{"message_type":"receive","time_ms":25605,"id":2,"receiver":2,"message":"CONSULT 1"}
-{"message_type":"notice","time_ms":26017,"id":1,"message":"1 send broadcast CONSULT"}
-{"message_type":"notice","time_ms":27605,"id":2,"message":"2 send broadcast CONSULT"}
-{"message_type":"receive","time_ms":27606,"id":2,"receiver":2,"message":"RESPOND 1"}
-{"message_type":"notice","time_ms":27606,"id":2,"message":"enter cs"}
-{"message_type":"receive","time_ms":28018,"id":1,"receiver":1,"message":"CONSULT 2"}
-{"message_type":"send","time_ms":28018,"id":1,"receiver":2,"message":"1 RESPOND from 1"}
-{"message_type":"receive","time_ms":33607,"id":2,"receiver":2,"message":"REQUEST 2"}
-{"message_type":"notice","time_ms":33607,"id":2,"message":"enter cs"}
-{"message_type":"receive","time_ms":33607,"id":2,"receiver":2,"message":"2 request token"}
-{"message_type":"receive","time_ms":35605,"id":2,"receiver":2,"message":"FAILURE 1"}
-{"message_type":"receive","time_ms":35607,"id":2,"receiver":2,"message":"TOKEN 2"}
-{"message_type":"receive","time_ms":35607,"id":2,"receiver":2,"message":"2 send token to 2"}
-{"message_type":"notice","time_ms":36018,"id":1,"message":"1 send broadcast FAILURE"}
-{"message_type":"notice","time_ms":38607,"id":2,"message":"enter cs"}
-{"message_type":"notice","time_ms":44608,"id":2,"message":"enter cs"}
+{"message_type":"notice","time_ms":10,"id":1,"message":"init"}
+{"message_type":"notice","time_ms":11,"id":3,"message":"init"}
+{"message_type":"notice","time_ms":11,"id":2,"message":"init"}
+{"message_type":"notice","time_ms":111,"id":4,"message":"init"}
+{"message_type":"notice","time_ms":111,"id":5,"message":"init"}
+{"message_type":"receive","time_ms":3011,"id":1,"receiver":1,"message":"1 received token request from 3"}
+{"message_type":"send","time_ms":3011,"id":3,"receiver":1,"message":"3 request token"}
+{"message_type":"notice","time_ms":3012,"id":3,"message":"enter cs"}
+{"message_type":"send","time_ms":3012,"id":1,"receiver":3,"message":"1 send token to 3"}
+{"message_type":"receive","time_ms":3012,"id":3,"receiver":3,"message":"3 received token from 1"}
+{"message_type":"receive","time_ms":3112,"id":1,"receiver":1,"message":"1 received token request from 5"}
+{"message_type":"send","time_ms":3112,"id":1,"receiver":3,"message":"1 send token request to 3 for 5"}
+{"message_type":"receive","time_ms":3112,"id":1,"receiver":1,"message":"1 received token request from 4"}
+{"message_type":"send","time_ms":3112,"id":5,"receiver":1,"message":"5 request token"}
+{"message_type":"send","time_ms":3112,"id":4,"receiver":1,"message":"4 request token"}
+{"message_type":"send","time_ms":3113,"id":1,"receiver":5,"message":"1 send token request to 5 for 4"}
+{"message_type":"receive","time_ms":3113,"id":3,"receiver":3,"message":"3 received token request from 5"}
+{"message_type":"receive","time_ms":3113,"id":5,"receiver":5,"message":"5 received token request from 4"}
+{"message_type":"send","time_ms":5011,"id":2,"receiver":1,"message":"2 request token"}
+{"message_type":"receive","time_ms":5011,"id":1,"receiver":1,"message":"1 received token request from 2"}
+{"message_type":"receive","time_ms":5011,"id":4,"receiver":4,"message":"4 received token request from 1"}
+{"message_type":"send","time_ms":5011,"id":1,"receiver":4,"message":"1 request token"}
+{"message_type":"receive","time_ms":5012,"id":5,"receiver":5,"message":"5 received token from 3"}
+{"message_type":"notice","time_ms":5013,"id":5,"message":"enter cs"}
+{"message_type":"send","time_ms":5013,"id":3,"receiver":5,"message":"3 send token to 5"}
+{"message_type":"receive","time_ms":7013,"id":4,"receiver":4,"message":"4 received token from 5"}
+{"message_type":"send","time_ms":7013,"id":5,"receiver":4,"message":"5 send token to 4"}
+{"message_type":"notice","time_ms":7013,"id":4,"message":"enter cs"}
+{"message_type":"send","time_ms":8013,"id":3,"receiver":5,"message":"3 request token"}
+{"message_type":"send","time_ms":8013,"id":5,"receiver":4,"message":"5 send token request to 4 for 3"}
+{"message_type":"receive","time_ms":8013,"id":4,"receiver":4,"message":"4 received token request from 3"}
+{"message_type":"send","time_ms":8013,"id":4,"receiver":1,"message":"4 send token request to 1 for 3"}
+{"message_type":"receive","time_ms":8013,"id":5,"receiver":5,"message":"5 received token request from 3"}
+{"message_type":"send","time_ms":8014,"id":1,"receiver":2,"message":"1 send token request to 2 for 3"}
+{"message_type":"receive","time_ms":8014,"id":2,"receiver":2,"message":"2 received token request from 3"}
+{"message_type":"receive","time_ms":8014,"id":1,"receiver":1,"message":"1 received token request from 3"}
+{"message_type":"send","time_ms":9013,"id":4,"receiver":1,"message":"4 send token to 1"}
+{"message_type":"receive","time_ms":9014,"id":1,"receiver":1,"message":"1 received token from 4"}
+{"message_type":"notice","time_ms":9014,"id":1,"message":"enter cs"}
+{"message_type":"notice","time_ms":10012,"id":2,"message":"2 send broadcast CONSULT"}
+{"message_type":"send","time_ms":10012,"id":1,"receiver":2,"message":"1 send RESPOND to 2"}
+{"message_type":"receive","time_ms":10012,"id":2,"receiver":2,"message":"2 received RESPOND from 1"}
+{"message_type":"send","time_ms":11014,"id":1,"receiver":2,"message":"1 send token to 2"}
+{"message_type":"notice","time_ms":11015,"id":2,"message":"enter cs"}
+{"message_type":"receive","time_ms":11015,"id":2,"receiver":2,"message":"2 received token from 1"}
+{"message_type":"send","time_ms":12013,"id":5,"receiver":3,"message":"5 request token"}
+{"message_type":"receive","time_ms":12014,"id":3,"receiver":3,"message":"3 received token request from 5"}
+{"message_type":"notice","time_ms":13014,"id":3,"message":"3 send broadcast CONSULT"}
+{"message_type":"send","time_ms":13014,"id":2,"receiver":3,"message":"2 send RESPOND to 3"}
+{"message_type":"receive","time_ms":13014,"id":3,"receiver":3,"message":"3 received RESPOND from 2"}
+{"message_type":"receive","time_ms":13015,"id":3,"receiver":3,"message":"3 received token from 2"}
+{"message_type":"notice","time_ms":13015,"id":3,"message":"enter cs"}
+{"message_type":"send","time_ms":13015,"id":2,"receiver":3,"message":"2 send token to 3"}
+{"message_type":"receive","time_ms":14014,"id":3,"receiver":3,"message":"3 received token request from 4"}
+{"message_type":"send","time_ms":14014,"id":4,"receiver":3,"message":"4 request token"}
+{"message_type":"receive","time_ms":14015,"id":5,"receiver":5,"message":"5 received token request from 4"}
+{"message_type":"send","time_ms":14015,"id":3,"receiver":5,"message":"3 send token request to 5 for 4"}
+{"message_type":"send","time_ms":15016,"id":3,"receiver":5,"message":"3 send token to 5"}
+{"message_type":"notice","time_ms":15016,"id":5,"message":"enter cs"}
+{"message_type":"receive","time_ms":15016,"id":5,"receiver":5,"message":"5 received token from 3"}
+{"message_type":"receive","time_ms":16015,"id":3,"receiver":3,"message":"3 received token request from 1"}
+{"message_type":"receive","time_ms":16015,"id":4,"receiver":4,"message":"4 received token request from 1"}
+{"message_type":"send","time_ms":16015,"id":3,"receiver":4,"message":"3 send token request to 4 for 1"}
+{"message_type":"send","time_ms":16015,"id":1,"receiver":3,"message":"1 request token"}
+{"message_type":"notice","time_ms":17016,"id":4,"message":"enter cs"}
+{"message_type":"send","time_ms":17016,"id":5,"receiver":4,"message":"5 send token to 4"}
+{"message_type":"receive","time_ms":17016,"id":4,"receiver":4,"message":"4 received token from 5"}
+{"message_type":"send","time_ms":18016,"id":2,"receiver":3,"message":"2 request token"}
+{"message_type":"send","time_ms":18016,"id":3,"receiver":1,"message":"3 send token request to 1 for 2"}
+{"message_type":"receive","time_ms":18016,"id":1,"receiver":1,"message":"1 received token request from 2"}
+{"message_type":"receive","time_ms":18016,"id":3,"receiver":3,"message":"3 received token request from 2"}
+{"message_type":"receive","time_ms":18017,"id":2,"receiver":2,"message":"2 received token request from 3"}
+{"message_type":"send","time_ms":18017,"id":3,"receiver":2,"message":"3 request token"}
+{"message_type":"send","time_ms":19016,"id":4,"receiver":1,"message":"4 send token to 1"}
+{"message_type":"receive","time_ms":19017,"id":1,"receiver":1,"message":"1 received token from 4"}
+{"message_type":"notice","time_ms":19017,"id":1,"message":"enter cs"}
+{"message_type":"receive","time_ms":21016,"id":4,"receiver":4,"message":"4 received token request from 5"}
+{"message_type":"send","time_ms":21016,"id":5,"receiver":4,"message":"5 request token"}
+{"message_type":"send","time_ms":21017,"id":1,"receiver":2,"message":"1 send token request to 2 for 5"}
+{"message_type":"send","time_ms":21017,"id":1,"receiver":2,"message":"1 send token to 2"}
+{"message_type":"send","time_ms":21017,"id":4,"receiver":1,"message":"4 send token request to 1 for 5"}
+{"message_type":"send","time_ms":21017,"id":2,"receiver":3,"message":"2 send token request to 3 for 5"}
+{"message_type":"receive","time_ms":21017,"id":2,"receiver":2,"message":"2 received token request from 5"}
+{"message_type":"receive","time_ms":21017,"id":1,"receiver":1,"message":"1 received token request from 5"}
+{"message_type":"receive","time_ms":21018,"id":3,"receiver":3,"message":"3 received token request from 5"}
+{"message_type":"notice","time_ms":21024,"id":2,"message":"enter cs"}
+{"message_type":"receive","time_ms":21024,"id":2,"receiver":2,"message":"2 received token from 1"}
+{"message_type":"receive","time_ms":23017,"id":5,"receiver":5,"message":"5 received token request from 4"}
+{"message_type":"send","time_ms":23017,"id":4,"receiver":5,"message":"4 request token"}
+{"message_type":"receive","time_ms":23018,"id":3,"receiver":3,"message":"3 received RESPOND from 2"}
+{"message_type":"send","time_ms":23018,"id":2,"receiver":3,"message":"2 send RESPOND to 3"}
+{"message_type":"notice","time_ms":23018,"id":3,"message":"3 send broadcast CONSULT"}
+{"message_type":"receive","time_ms":23025,"id":3,"receiver":3,"message":"3 received token from 2"}
+{"message_type":"notice","time_ms":23025,"id":3,"message":"enter cs"}
+{"message_type":"send","time_ms":23025,"id":2,"receiver":3,"message":"2 send token to 3"}
+{"message_type":"receive","time_ms":25025,"id":5,"receiver":5,"message":"5 received token from 3"}
+{"message_type":"notice","time_ms":25026,"id":5,"message":"enter cs"}
+{"message_type":"send","time_ms":26024,"id":1,"receiver":5,"message":"1 request token"}
+{"message_type":"receive","time_ms":26025,"id":5,"receiver":5,"message":"5 received token request from 1"}
+{"message_type":"send","time_ms":26025,"id":5,"receiver":4,"message":"5 send token request to 4 for 1"}
+{"message_type":"receive","time_ms":26025,"id":5,"receiver":5,"message":"5 received token request from 2"}

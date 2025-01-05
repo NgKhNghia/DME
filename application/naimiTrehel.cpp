@@ -1,4 +1,6 @@
+#include "naimiTrehel_v1.h"
 #include "naimiTrehel_v2.h"
+#include "naimiTrehel_v3.h"
 #include <random>
 
 Config config;
@@ -6,13 +8,15 @@ Logger* logger = nullptr;
 ErrorSimulator error;
 
 void simulateNode(int nodeId) {
-    logger = new Logger(nodeId, true, true, true);
+    logger = new Logger(nodeId, true, false, false);
     std::string ip = config.getAddress(nodeId);
     int port = config.getPort(nodeId);
     std::shared_ptr<Comm> comm = std::make_shared<Comm>(nodeId, port);
-    NaimiTrehel node(nodeId, ip, port, comm);
+    // NaimiTrehelV1 node(nodeId, ip, port, comm);
+    // NaimiTrehelV2 node(nodeId, ip, port, comm);
+    NaimiTrehelV3 node(nodeId, ip, port, 2, comm);
     node.initialize();
-    error.setErrorProbability(NETWORK_ERROR, 0.1);
+    // error.setErrorProbability(NETWORK_ERROR, 0.9);
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -27,6 +31,7 @@ void simulateNode(int nodeId) {
         {
             logger->log(nodeId, -1, "enter cs");
             std::this_thread::sleep_for(std::chrono::seconds(2));
+            logger->log(nodeId, -1, "exit cs");
         }
         node.releaseToken();
     }

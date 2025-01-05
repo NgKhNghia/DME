@@ -46,44 +46,39 @@ public:
         return dis(gen) < errorProbabilities[errorType];
     }
 
-    // // Kiểm tra nếu mất mạng
-    // bool isNetworkDisconnected() const {
-    //     return isDisconnected;
-    // }
-
     // Giả lập lỗi mất kết nối mạng
     bool simulateNetworkError() {
         if (triggerError(NETWORK_ERROR)) {
-            std::this_thread::sleep_for(std::chrono::seconds(20));  // Tạm thời mất mạng
+            // std::this_thread::sleep_for(std::chrono::seconds(20));  // Tạm thời mất mạng
             return true;
         }
         return false;
     }
 
-    // Giả lập lỗi mất gói tin
-    bool simulateMessageLoss() {
-        if (triggerError(MESSAGE_LOSS)) {
-            return true;
-        }
-        return false;
-    }
+    // // Giả lập lỗi mất gói tin
+    // bool simulateMessageLoss() {
+    //     if (triggerError(MESSAGE_LOSS)) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
-    // Giả lập lỗi trễ gói tin
-    bool simulateMessageDelay() {
-        if (triggerError(MESSAGE_DELAY)) {
-            return true;
-        }
-        return false;
-    }
+    // // Giả lập lỗi trễ gói tin
+    // bool simulateMessageDelay() {
+    //     if (triggerError(MESSAGE_DELAY)) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
-    // Giả lập gói tin đã bị thay đổi
-    bool simulateMessageModified(std::string& messageContent) {
-        if (triggerError(MESSAGE_MODIFIED)) {
-            messageContent = messageContent + "(Modified)";  // Thay đổi nội dung tin nhắn
-            return true;
-        }
-        return false;
-    }
+    // // Giả lập gói tin đã bị thay đổi
+    // bool simulateMessageModified(std::string& messageContent) {
+    //     if (triggerError(MESSAGE_MODIFIED)) {
+    //         messageContent = messageContent + "(Modified)";  // Thay đổi nội dung tin nhắn
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     
 };

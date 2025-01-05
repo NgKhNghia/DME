@@ -71,15 +71,16 @@ public:
 
     void send(int destId, const std::string& message) {       
         if (error.simulateNetworkError()) {
-            std::this_thread::sleep_for(std::chrono::seconds(3));
+            // std::this_thread::sleep_for(std::chrono::seconds(3));
             // logger->log(id, -1, "NETWORK_ERROR");
-        }
-        else if (error.simulateMessageLoss()) {
             return;
         }
-        else if (error.simulateMessageDelay()) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
+        // else if (error.simulateMessageLoss()) {
+        //     return;
+        // }
+        // else if (error.simulateMessageDelay()) {
+        //     std::this_thread::sleep_for(std::chrono::seconds(1));
+        // }
 
         auto it = config.getNodeConfigs().find(destId);
         // if (it == config.getNodeConfigs().end()) {

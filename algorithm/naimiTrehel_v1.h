@@ -1,6 +1,6 @@
-// naimiTrehel.h
-#ifndef NAIMITREHEL_H
-#define NAIMITREHEL_H
+// naimiTrehel_v1.h
+#ifndef NAIMITREHELV1_H
+#define NAIMITREHELV1_H
 
 #include "node.h"
 #include <memory>
@@ -8,7 +8,7 @@
 #include <condition_variable>
 #include <thread>
 
-class NaimiTrehel : public TokenBasedNode {
+class NaimiTrehelV1 : public TokenBasedNode {
 private:   
     int last;
     int next;
@@ -19,13 +19,13 @@ private:
     std::thread listenerThread;
 
 public:
-    NaimiTrehel(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
+    NaimiTrehelV1(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
         : TokenBasedNode(id, ip, port, comm), last(1), next(-1), inCS(false), nextUpdate(false) {
         hasToken = (id == 1);
         logger->log(id, -1, "init");
     }   
 
-    ~NaimiTrehel() {
+    ~NaimiTrehelV1() {
         if (listenerThread.joinable()) {
             listenerThread.join();
         }
@@ -33,7 +33,7 @@ public:
     }
 
     void initialize() override {
-        listenerThread = std::thread(&NaimiTrehel::listenForMessages, this);
+        listenerThread = std::thread(&NaimiTrehelV1::listenForMessages, this);
     }
 
     void requestToken() override {
@@ -117,4 +117,4 @@ private:
 
 };
 
-#endif // NAIMITREHEL_H
+#endif // NAIMITREHELV1_H
