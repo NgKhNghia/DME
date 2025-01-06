@@ -17,7 +17,7 @@ public:
     ~LoggingMethod() = default;
     virtual void init() {}
     virtual void clean() {}
-    virtual void log(int id, int receiver = -1, const std::string &message = "") = 0;
+    virtual void log(int id, const std::string &logData) = 0;
 };
 
 class ConsoleLoggingMethod : public LoggingMethod {
@@ -25,9 +25,9 @@ protected:
     std::mutex consoleMutex;
 
 public:
-    void log(int id, int receiver = -1, const std::string &message = "") override {
+    void log(int id, const std::string &logData) override {
         std::unique_lock lock(consoleMutex);
-        std::cout << message << "\n";
+        std::cout << logData << "\n";
     }
 };
 
@@ -83,10 +83,10 @@ public:
         }
     }
 
-    void log(int id, int receiver = -1, const std::string &message = "") override {
+    void log(int id, const std::string &logData) override {
         if (!file.is_open()) return;
         std::unique_lock lock(fileMutex);
-        queue.push(message);
+        queue.push(logData);
         cond.notify_one();
     }
 };
@@ -122,9 +122,9 @@ public:
         mqttThread = std::thread(&MqttLoggingMethod::processLogs, this);
     }
 
-    void log(int id, int receiver = -1, const std::string &message = "") override {
+    void log(int id, const std::string &logData) override {
         std::unique_lock<std::mutex> lock(mtx);
-        queue.push(message);
+        queue.push(logData);
         cond.notify_one();
     }
 
@@ -167,6 +167,7 @@ protected:
     bool toMqtt;
     std::list<std::shared_ptr<LoggingMethod>> methods;
     std::chrono::steady_clock::time_point startTime;
+    std::string pointTime;
 
 public:
     Logger(int id, bool console, bool file, bool mqtt) : id(id), toConsole(console), toFile(file), toMqtt(mqtt) {
@@ -181,7 +182,8 @@ public:
 
     void init() {
         startTime = std::chrono::steady_clock::now();
-        
+        pointTime = getPointTime();
+
         if (toConsole) methods.push_back(std::make_shared<ConsoleLoggingMethod>());
         if (toFile) methods.push_back(std::make_shared<FileLoggingMethod>());
         if (toMqtt) methods.push_back(std::make_shared<MqttLoggingMethod>(id));
@@ -194,34 +196,83 @@ public:
         }
     }
 
-    int getTime() {
+    std::string getPointTime() {
+        auto now = std::chrono::system_clock::now();
+        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+        std::tm* tm_info = std::localtime(&now_time);
+        std::ostringstream oss;
+        oss << std::put_time(tm_info, "%Y-%m-%d %H:%M:%S");
+        return oss.str();
+    }
+
+
+    int getDuration() {
         auto now = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
         return static_cast<int>(duration);
     }
 
-    void log(int id, int receiver = -1, const std::string &message = "") {
+    /*
+        type: notice, send, receive
+        algorithm: permission, token
+        time: yyyy-dd-mm hh-mm-ss
+        duration_ms: ...
+        souce: ...
+        dest: ..., null
+        direcion: a to b, broadcast, multicast
+        token / permissible: yes, no
+        content: ..., null
+    */
+    void log(const std::string &type, const std::string &algorithm, int source, int dest, const std::string &direction, bool permissionOrToken, const std::string &state, const std::string &content) {
         json data;
-        if (receiver == -1) {
-            data["message_type"] = "notice";
-        } else if (receiver == id) {
-            data["message_type"] = "receive";
-        } else if (receiver != -1) {
-            data["message_type"] = "send";
+        data["time"] = pointTime;
+        data["duration_ms"] = getDuration();
+        data["type"] = type;
+        data["algorithm"] = algorithm;
+        data["source"] = source;
+        if (dest != -1) {
+            data["dest"] = dest;
         }
-
-        data["time_ms"] = getTime();
-        data["id"] = id;
-        if (receiver != -1) {
-            data["receiver"] = receiver;
+        if (!direction.empty()) {
+            data["direction"] = direction;
         }
-        data["message"] = message;
-        std::string logMessage = data.dump();
+        if (algorithm == "permission") {
+            data["permissible"] = permissionOrToken ? "yes" : "no";
+        } else if (algorithm == "token") {
+            data["token"] = permissionOrToken ? "yes" : "no";
+        }
+        data["state"] = state;
+        data["content"] = content;
+        std::string logData = data.dump();
 
-        for (auto& m : methods) {
-            m->log(id, receiver, logMessage);
+        for (auto &m : methods) {
+            m->log(source, logData);
         }
     }
+
+
+    // void log(int id, int receiver = -1, const std::string &message = "") {
+    //     json data;
+    //     if (receiver == -1) {
+    //         data["message_type"] = "notice";
+    //     } else if (receiver == id) {
+    //         data["message_type"] = "receive";
+    //     } else if (receiver != -1) {
+    //         data["message_type"] = "send";
+    //     }
+
+    //     data["time_ms"] = getTime();
+    //     data["id"] = id;
+    //     if (receiver != -1) {
+    //         data["receiver"] = receiver;
+    //     }
+    //     data["message"] = message;
+    //     std::string logMessage = data.dump();
+
+    //     for (auto& m : methods) {
+    //         m->log(id, receiver, logMessage);
+    //     }
+    // }
 };
 
 

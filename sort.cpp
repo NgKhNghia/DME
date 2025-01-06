@@ -9,15 +9,16 @@ using json = nlohmann::ordered_json;
 using namespace std;
 
 bool compare_by_time_ms(const json& a, const json& b) {
-    return a["time_ms"] < b["time_ms"];
+    return a["duration_ms"] < b["duration_ms"];
 }
 
 int main() {
     ifstream input("log.txt");
     ofstream output("output_log.txt");
 
+    // Kiểm tra xem file input có mở được không
     if (!input.is_open()) {
-        cerr << "Lỗi mở file!" << endl;
+        cerr << "Lỗi mở file log.txt!" << endl;
         return 1;
     }
 
@@ -29,16 +30,16 @@ int main() {
             continue; // Bỏ qua dòng trống
         }
 
-        // try {
+        try {
             json log = json::parse(line); // Thử phân tích JSON
             logs.push_back(log);
-        // } catch (const json::parse_error& e) {
-        //     cerr << "Lỗi phân tích dòng: " << line << " - " << e.what() << endl;
-        //     continue; // Bỏ qua dòng không hợp lệ
-        // }
+        } catch (const json::parse_error& e) {
+            cerr << "Lỗi phân tích dòng: " << line << " - " << e.what() << endl;
+            continue; // Bỏ qua dòng không hợp lệ
+        }
     }
 
-    // Sắp xếp các dòng theo trường "time_ms"
+    // Sắp xếp các dòng theo trường "duration_ms"
     sort(logs.begin(), logs.end(), compare_by_time_ms);
 
     // Ghi lại các dòng đã sắp xếp vào file mới
@@ -46,6 +47,7 @@ int main() {
         output << log.dump() << endl;
     }
 
-    // cout << "Logs đã được sắp xếp và ghi vào file sorted_log.txt" << endl;
+    cout << "Logs đã được sắp xếp và ghi vào file output_log.txt" << endl;
+
     return 0;
 }

@@ -1,101 +1,199 @@
-{"message_type":"notice","time_ms":10,"id":1,"message":"init"}
-{"message_type":"notice","time_ms":11,"id":3,"message":"init"}
-{"message_type":"notice","time_ms":11,"id":2,"message":"init"}
-{"message_type":"notice","time_ms":111,"id":4,"message":"init"}
-{"message_type":"notice","time_ms":111,"id":5,"message":"init"}
-{"message_type":"receive","time_ms":3011,"id":1,"receiver":1,"message":"1 received token request from 3"}
-{"message_type":"send","time_ms":3011,"id":3,"receiver":1,"message":"3 request token"}
-{"message_type":"notice","time_ms":3012,"id":3,"message":"enter cs"}
-{"message_type":"send","time_ms":3012,"id":1,"receiver":3,"message":"1 send token to 3"}
-{"message_type":"receive","time_ms":3012,"id":3,"receiver":3,"message":"3 received token from 1"}
-{"message_type":"receive","time_ms":3112,"id":1,"receiver":1,"message":"1 received token request from 5"}
-{"message_type":"send","time_ms":3112,"id":1,"receiver":3,"message":"1 send token request to 3 for 5"}
-{"message_type":"receive","time_ms":3112,"id":1,"receiver":1,"message":"1 received token request from 4"}
-{"message_type":"send","time_ms":3112,"id":5,"receiver":1,"message":"5 request token"}
-{"message_type":"send","time_ms":3112,"id":4,"receiver":1,"message":"4 request token"}
-{"message_type":"send","time_ms":3113,"id":1,"receiver":5,"message":"1 send token request to 5 for 4"}
-{"message_type":"receive","time_ms":3113,"id":3,"receiver":3,"message":"3 received token request from 5"}
-{"message_type":"receive","time_ms":3113,"id":5,"receiver":5,"message":"5 received token request from 4"}
-{"message_type":"send","time_ms":5011,"id":2,"receiver":1,"message":"2 request token"}
-{"message_type":"receive","time_ms":5011,"id":1,"receiver":1,"message":"1 received token request from 2"}
-{"message_type":"receive","time_ms":5011,"id":4,"receiver":4,"message":"4 received token request from 1"}
-{"message_type":"send","time_ms":5011,"id":1,"receiver":4,"message":"1 request token"}
-{"message_type":"receive","time_ms":5012,"id":5,"receiver":5,"message":"5 received token from 3"}
-{"message_type":"notice","time_ms":5013,"id":5,"message":"enter cs"}
-{"message_type":"send","time_ms":5013,"id":3,"receiver":5,"message":"3 send token to 5"}
-{"message_type":"receive","time_ms":7013,"id":4,"receiver":4,"message":"4 received token from 5"}
-{"message_type":"send","time_ms":7013,"id":5,"receiver":4,"message":"5 send token to 4"}
-{"message_type":"notice","time_ms":7013,"id":4,"message":"enter cs"}
-{"message_type":"send","time_ms":8013,"id":3,"receiver":5,"message":"3 request token"}
-{"message_type":"send","time_ms":8013,"id":5,"receiver":4,"message":"5 send token request to 4 for 3"}
-{"message_type":"receive","time_ms":8013,"id":4,"receiver":4,"message":"4 received token request from 3"}
-{"message_type":"send","time_ms":8013,"id":4,"receiver":1,"message":"4 send token request to 1 for 3"}
-{"message_type":"receive","time_ms":8013,"id":5,"receiver":5,"message":"5 received token request from 3"}
-{"message_type":"send","time_ms":8014,"id":1,"receiver":2,"message":"1 send token request to 2 for 3"}
-{"message_type":"receive","time_ms":8014,"id":2,"receiver":2,"message":"2 received token request from 3"}
-{"message_type":"receive","time_ms":8014,"id":1,"receiver":1,"message":"1 received token request from 3"}
-{"message_type":"send","time_ms":9013,"id":4,"receiver":1,"message":"4 send token to 1"}
-{"message_type":"receive","time_ms":9014,"id":1,"receiver":1,"message":"1 received token from 4"}
-{"message_type":"notice","time_ms":9014,"id":1,"message":"enter cs"}
-{"message_type":"notice","time_ms":10012,"id":2,"message":"2 send broadcast CONSULT"}
-{"message_type":"send","time_ms":10012,"id":1,"receiver":2,"message":"1 send RESPOND to 2"}
-{"message_type":"receive","time_ms":10012,"id":2,"receiver":2,"message":"2 received RESPOND from 1"}
-{"message_type":"send","time_ms":11014,"id":1,"receiver":2,"message":"1 send token to 2"}
-{"message_type":"notice","time_ms":11015,"id":2,"message":"enter cs"}
-{"message_type":"receive","time_ms":11015,"id":2,"receiver":2,"message":"2 received token from 1"}
-{"message_type":"send","time_ms":12013,"id":5,"receiver":3,"message":"5 request token"}
-{"message_type":"receive","time_ms":12014,"id":3,"receiver":3,"message":"3 received token request from 5"}
-{"message_type":"notice","time_ms":13014,"id":3,"message":"3 send broadcast CONSULT"}
-{"message_type":"send","time_ms":13014,"id":2,"receiver":3,"message":"2 send RESPOND to 3"}
-{"message_type":"receive","time_ms":13014,"id":3,"receiver":3,"message":"3 received RESPOND from 2"}
-{"message_type":"receive","time_ms":13015,"id":3,"receiver":3,"message":"3 received token from 2"}
-{"message_type":"notice","time_ms":13015,"id":3,"message":"enter cs"}
-{"message_type":"send","time_ms":13015,"id":2,"receiver":3,"message":"2 send token to 3"}
-{"message_type":"receive","time_ms":14014,"id":3,"receiver":3,"message":"3 received token request from 4"}
-{"message_type":"send","time_ms":14014,"id":4,"receiver":3,"message":"4 request token"}
-{"message_type":"receive","time_ms":14015,"id":5,"receiver":5,"message":"5 received token request from 4"}
-{"message_type":"send","time_ms":14015,"id":3,"receiver":5,"message":"3 send token request to 5 for 4"}
-{"message_type":"send","time_ms":15016,"id":3,"receiver":5,"message":"3 send token to 5"}
-{"message_type":"notice","time_ms":15016,"id":5,"message":"enter cs"}
-{"message_type":"receive","time_ms":15016,"id":5,"receiver":5,"message":"5 received token from 3"}
-{"message_type":"receive","time_ms":16015,"id":3,"receiver":3,"message":"3 received token request from 1"}
-{"message_type":"receive","time_ms":16015,"id":4,"receiver":4,"message":"4 received token request from 1"}
-{"message_type":"send","time_ms":16015,"id":3,"receiver":4,"message":"3 send token request to 4 for 1"}
-{"message_type":"send","time_ms":16015,"id":1,"receiver":3,"message":"1 request token"}
-{"message_type":"notice","time_ms":17016,"id":4,"message":"enter cs"}
-{"message_type":"send","time_ms":17016,"id":5,"receiver":4,"message":"5 send token to 4"}
-{"message_type":"receive","time_ms":17016,"id":4,"receiver":4,"message":"4 received token from 5"}
-{"message_type":"send","time_ms":18016,"id":2,"receiver":3,"message":"2 request token"}
-{"message_type":"send","time_ms":18016,"id":3,"receiver":1,"message":"3 send token request to 1 for 2"}
-{"message_type":"receive","time_ms":18016,"id":1,"receiver":1,"message":"1 received token request from 2"}
-{"message_type":"receive","time_ms":18016,"id":3,"receiver":3,"message":"3 received token request from 2"}
-{"message_type":"receive","time_ms":18017,"id":2,"receiver":2,"message":"2 received token request from 3"}
-{"message_type":"send","time_ms":18017,"id":3,"receiver":2,"message":"3 request token"}
-{"message_type":"send","time_ms":19016,"id":4,"receiver":1,"message":"4 send token to 1"}
-{"message_type":"receive","time_ms":19017,"id":1,"receiver":1,"message":"1 received token from 4"}
-{"message_type":"notice","time_ms":19017,"id":1,"message":"enter cs"}
-{"message_type":"receive","time_ms":21016,"id":4,"receiver":4,"message":"4 received token request from 5"}
-{"message_type":"send","time_ms":21016,"id":5,"receiver":4,"message":"5 request token"}
-{"message_type":"send","time_ms":21017,"id":1,"receiver":2,"message":"1 send token request to 2 for 5"}
-{"message_type":"send","time_ms":21017,"id":1,"receiver":2,"message":"1 send token to 2"}
-{"message_type":"send","time_ms":21017,"id":4,"receiver":1,"message":"4 send token request to 1 for 5"}
-{"message_type":"send","time_ms":21017,"id":2,"receiver":3,"message":"2 send token request to 3 for 5"}
-{"message_type":"receive","time_ms":21017,"id":2,"receiver":2,"message":"2 received token request from 5"}
-{"message_type":"receive","time_ms":21017,"id":1,"receiver":1,"message":"1 received token request from 5"}
-{"message_type":"receive","time_ms":21018,"id":3,"receiver":3,"message":"3 received token request from 5"}
-{"message_type":"notice","time_ms":21024,"id":2,"message":"enter cs"}
-{"message_type":"receive","time_ms":21024,"id":2,"receiver":2,"message":"2 received token from 1"}
-{"message_type":"receive","time_ms":23017,"id":5,"receiver":5,"message":"5 received token request from 4"}
-{"message_type":"send","time_ms":23017,"id":4,"receiver":5,"message":"4 request token"}
-{"message_type":"receive","time_ms":23018,"id":3,"receiver":3,"message":"3 received RESPOND from 2"}
-{"message_type":"send","time_ms":23018,"id":2,"receiver":3,"message":"2 send RESPOND to 3"}
-{"message_type":"notice","time_ms":23018,"id":3,"message":"3 send broadcast CONSULT"}
-{"message_type":"receive","time_ms":23025,"id":3,"receiver":3,"message":"3 received token from 2"}
-{"message_type":"notice","time_ms":23025,"id":3,"message":"enter cs"}
-{"message_type":"send","time_ms":23025,"id":2,"receiver":3,"message":"2 send token to 3"}
-{"message_type":"receive","time_ms":25025,"id":5,"receiver":5,"message":"5 received token from 3"}
-{"message_type":"notice","time_ms":25026,"id":5,"message":"enter cs"}
-{"message_type":"send","time_ms":26024,"id":1,"receiver":5,"message":"1 request token"}
-{"message_type":"receive","time_ms":26025,"id":5,"receiver":5,"message":"5 received token request from 1"}
-{"message_type":"send","time_ms":26025,"id":5,"receiver":4,"message":"5 send token request to 4 for 1"}
-{"message_type":"receive","time_ms":26025,"id":5,"receiver":5,"message":"5 received token request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":0,"type":"notice","algorithm":"token","source":4,"token":"no","state":"init","content":"node 4 init"}
+{"time":"2025-01-06 23:57:04","duration_ms":0,"type":"notice","algorithm":"token","source":2,"token":"no","state":"init","content":"node 2 init"}
+{"time":"2025-01-06 23:57:04","duration_ms":0,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"init","content":"node 1 init"}
+{"time":"2025-01-06 23:57:04","duration_ms":0,"type":"notice","algorithm":"token","source":5,"token":"no","state":"init","content":"node 5 init"}
+{"time":"2025-01-06 23:57:04","duration_ms":0,"type":"notice","algorithm":"token","source":3,"token":"no","state":"init","content":"node 3 init"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"send","algorithm":"token","source":1,"dest":3,"direction":"1 to 3","token":"yes","state":"sent","content":"1 sent request to 3 for 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"send","algorithm":"token","source":2,"dest":1,"direction":"2 to 1","token":"no","state":"sent","content":"2 sent request to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"send","algorithm":"token","source":4,"dest":1,"direction":"4 to 1","token":"no","state":"sent","content":"4 sent request to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"send","algorithm":"token","source":3,"dest":1,"direction":"3 to 1","token":"no","state":"sent","content":"3 sent request to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"recieve","algorithm":"token","source":2,"dest":1,"direction":"2 to 1","token":"yes","state":"received","content":"1 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"yes","state":"sent","content":"1 sent request to 4 for 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"recieve","algorithm":"token","source":3,"dest":1,"direction":"3 to 1","token":"yes","state":"received","content":"1 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"yes","state":"sent","content":"1 sent commit message to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":3000,"type":"recieve","algorithm":"token","source":4,"dest":1,"direction":"4 to 1","token":"yes","state":"received","content":"1 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":3001,"type":"receive","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"received","content":"3 received commit message from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":3001,"type":"receive","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received commit message from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":3001,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent commit message to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":3001,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"sent","content":"3 sent commit message to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":3001,"type":"recieve","algorithm":"token","source":3,"dest":4,"direction":"3 to 4","token":"no","state":"received","content":"4 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":3001,"type":"receive","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received commit message from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":3001,"type":"recieve","algorithm":"token","source":2,"dest":3,"direction":"2 to 3","token":"no","state":"received","content":"3 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":4000,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"enter cs","content":"node 1 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":5000,"type":"receive","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"received","content":"5 received commit message from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":5000,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"sent","content":"5 sent request to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":5001,"type":"send","algorithm":"token","source":1,"dest":2,"direction":"1 to 2","token":"yes","state":"sent","content":"1 sent request to 2 for 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":5001,"type":"recieve","algorithm":"token","source":5,"dest":2,"direction":"5 to 2","token":"no","state":"received","content":"2 received request from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":5001,"type":"recieve","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"yes","state":"received","content":"1 received request from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":5001,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"sent","content":"2 sent commit message to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":6000,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"yes","state":"","content":"1 sent token to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":6000,"type":"recieve","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received token from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":6000,"type":"notice","algorithm":"token","source":4,"token":"yes","state":"enter cs","content":"node 4 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":6000,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"exit cs","content":"node 1 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":6000,"type":"notice","algorithm":"token","source":1,"token":"no","state":"","content":"1 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":8001,"type":"notice","algorithm":"token","source":4,"token":"yes","state":"exit cs","content":"node 4 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":8001,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"yes","state":"","content":"4 sent token to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":8001,"type":"notice","algorithm":"token","source":4,"token":"no","state":"","content":"4 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":8001,"type":"recieve","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"received","content":"3 received token from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":9000,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"sent","content":"5 sent commit message to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":9000,"type":"recieve","algorithm":"token","source":1,"dest":5,"direction":"1 to 5","token":"no","state":"received","content":"5 received request from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":9001,"type":"receive","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"received","content":"1 received commit message from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":9001,"type":"send","algorithm":"token","source":1,"dest":5,"direction":"1 to 5","token":"no","state":"sent","content":"1 sent request to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"sent","content":"5 sent request to 1 for 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"notice","algorithm":"token","source":3,"token":"yes","state":"enter cs","content":"node 3 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent request to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"sent","content":"2 sent request to 5 for 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"recieve","algorithm":"token","source":4,"dest":5,"direction":"4 to 5","token":"no","state":"received","content":"5 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"yes","state":"sent","content":"3 sent request to 2 for 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"recieve","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"yes","state":"received","content":"3 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":13001,"type":"recieve","algorithm":"token","source":4,"dest":2,"direction":"4 to 2","token":"no","state":"received","content":"2 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":13002,"type":"receive","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received commit message from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":13002,"type":"recieve","algorithm":"token","source":4,"dest":1,"direction":"4 to 1","token":"no","state":"received","content":"1 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":13002,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"sent","content":"1 sent commit message to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":15002,"type":"notice","algorithm":"token","source":3,"token":"yes","state":"exit cs","content":"node 3 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":15002,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"yes","state":"","content":"3 sent token to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":15002,"type":"recieve","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received token from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":15002,"type":"notice","algorithm":"token","source":2,"token":"yes","state":"enter cs","content":"node 2 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":15002,"type":"notice","algorithm":"token","source":3,"token":"no","state":"","content":"3 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":17002,"type":"notice","algorithm":"token","source":2,"token":"yes","state":"exit cs","content":"node 2 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":17002,"type":"recieve","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"received","content":"5 received token from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":17003,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"yes","state":"","content":"2 sent token to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":17003,"type":"notice","algorithm":"token","source":2,"token":"no","state":"","content":"2 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":19002,"type":"recieve","algorithm":"token","source":3,"dest":4,"direction":"3 to 4","token":"no","state":"received","content":"4 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":19002,"type":"send","algorithm":"token","source":3,"dest":4,"direction":"3 to 4","token":"no","state":"sent","content":"3 sent request to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":19003,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent commit message to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":19003,"type":"receive","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"received","content":"3 received commit message from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":22003,"type":"send","algorithm":"token","source":2,"dest":4,"direction":"2 to 4","token":"no","state":"sent","content":"2 sent request to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":22003,"type":"notice","algorithm":"token","source":5,"token":"yes","state":"enter cs","content":"node 5 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":22003,"type":"recieve","algorithm":"token","source":2,"dest":4,"direction":"2 to 4","token":"no","state":"received","content":"4 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":22004,"type":"recieve","algorithm":"token","source":2,"dest":3,"direction":"2 to 3","token":"no","state":"received","content":"3 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":22004,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent request to 3 for 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":22004,"type":"receive","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received commit message from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":22004,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"sent","content":"3 sent commit message to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":24003,"type":"notice","algorithm":"token","source":5,"token":"yes","state":"exit cs","content":"node 5 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":24003,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"yes","state":"","content":"5 sent token to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":24003,"type":"notice","algorithm":"token","source":5,"token":"no","state":"","content":"5 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":24004,"type":"recieve","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"received","content":"1 received token from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":29004,"type":"recieve","algorithm":"token","source":5,"dest":4,"direction":"5 to 4","token":"no","state":"received","content":"4 received request from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":29004,"type":"send","algorithm":"token","source":5,"dest":4,"direction":"5 to 4","token":"no","state":"sent","content":"5 sent request to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":29005,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"enter cs","content":"node 1 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":29005,"type":"send","algorithm":"token","source":4,"dest":2,"direction":"4 to 2","token":"no","state":"sent","content":"4 sent request to 2 for 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":29005,"type":"receive","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"received","content":"5 received commit message from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":29005,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"sent","content":"2 sent commit message to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":29005,"type":"recieve","algorithm":"token","source":5,"dest":2,"direction":"5 to 2","token":"no","state":"received","content":"2 received request from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":31005,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"exit cs","content":"node 1 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":31005,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"yes","state":"","content":"1 sent token to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":31005,"type":"notice","algorithm":"token","source":1,"token":"no","state":"","content":"1 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":31005,"type":"recieve","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received token from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":36006,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"sent","content":"5 sent commit message to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":36006,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"sent","content":"1 sent request to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":36006,"type":"recieve","algorithm":"token","source":1,"dest":5,"direction":"1 to 5","token":"no","state":"received","content":"5 received request from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":36006,"type":"recieve","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"yes","state":"received","content":"4 received request from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":36007,"type":"notice","algorithm":"token","source":4,"token":"yes","state":"enter cs","content":"node 4 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":36007,"type":"send","algorithm":"token","source":4,"dest":5,"direction":"4 to 5","token":"yes","state":"sent","content":"4 sent request to 5 for 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":36007,"type":"receive","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"received","content":"1 received commit message from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":38007,"type":"notice","algorithm":"token","source":4,"token":"yes","state":"exit cs","content":"node 4 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":38007,"type":"recieve","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"received","content":"3 received token from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":38007,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"yes","state":"","content":"4 sent token to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":38008,"type":"notice","algorithm":"token","source":3,"token":"yes","state":"enter cs","content":"node 3 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":38008,"type":"notice","algorithm":"token","source":4,"token":"no","state":"","content":"4 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":40008,"type":"notice","algorithm":"token","source":3,"token":"no","state":"","content":"3 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":40008,"type":"notice","algorithm":"token","source":2,"token":"yes","state":"enter cs","content":"node 2 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":40008,"type":"recieve","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received token from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":40008,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"yes","state":"","content":"3 sent token to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":40008,"type":"notice","algorithm":"token","source":3,"token":"yes","state":"exit cs","content":"node 3 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":42009,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"yes","state":"","content":"2 sent token to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":42009,"type":"recieve","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"received","content":"5 received token from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":42009,"type":"notice","algorithm":"token","source":2,"token":"yes","state":"exit cs","content":"node 2 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":42009,"type":"notice","algorithm":"token","source":2,"token":"no","state":"","content":"2 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":43008,"type":"recieve","algorithm":"token","source":4,"dest":1,"direction":"4 to 1","token":"no","state":"received","content":"1 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":43008,"type":"send","algorithm":"token","source":4,"dest":1,"direction":"4 to 1","token":"no","state":"sent","content":"4 sent request to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":43008,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"sent","content":"1 sent commit message to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":43008,"type":"receive","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received commit message from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":45008,"type":"recieve","algorithm":"token","source":3,"dest":5,"direction":"3 to 5","token":"yes","state":"received","content":"5 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"receive","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received commit message from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent commit message to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"sent","content":"1 sent request to 4 for 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"yes","state":"sent","content":"5 sent request to 1 for 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"send","algorithm":"token","source":2,"dest":3,"direction":"2 to 3","token":"no","state":"sent","content":"2 sent request to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"recieve","algorithm":"token","source":3,"dest":1,"direction":"3 to 1","token":"no","state":"received","content":"1 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"receive","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"received","content":"3 received commit message from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"sent","content":"3 sent request to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"recieve","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"sent","content":"2 sent request to 5 for 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45009,"type":"recieve","algorithm":"token","source":3,"dest":4,"direction":"3 to 4","token":"no","state":"received","content":"4 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":45010,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"sent","content":"3 sent commit message to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":45010,"type":"recieve","algorithm":"token","source":2,"dest":3,"direction":"2 to 3","token":"no","state":"received","content":"3 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":47009,"type":"notice","algorithm":"token","source":5,"token":"yes","state":"enter cs","content":"node 5 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":49010,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"yes","state":"","content":"5 sent token to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":49010,"type":"notice","algorithm":"token","source":5,"token":"no","state":"","content":"5 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":49010,"type":"notice","algorithm":"token","source":5,"token":"yes","state":"exit cs","content":"node 5 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":49011,"type":"recieve","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"received","content":"1 received token from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":52011,"type":"recieve","algorithm":"token","source":5,"dest":3,"direction":"5 to 3","token":"no","state":"received","content":"3 received request from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":52011,"type":"recieve","algorithm":"token","source":5,"dest":2,"direction":"5 to 2","token":"no","state":"received","content":"2 received request from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":52011,"type":"send","algorithm":"token","source":5,"dest":3,"direction":"5 to 3","token":"no","state":"sent","content":"5 sent request to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":52011,"type":"receive","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"received","content":"5 received commit message from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":52011,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"sent","content":"3 sent request to 2 for 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":52012,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"sent","content":"2 sent commit message to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":54012,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"enter cs","content":"node 1 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":56012,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"yes","state":"","content":"1 sent token to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":56012,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"exit cs","content":"node 1 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":56013,"type":"recieve","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received token from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":56013,"type":"notice","algorithm":"token","source":1,"token":"no","state":"","content":"1 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":61013,"type":"recieve","algorithm":"token","source":1,"dest":3,"direction":"1 to 3","token":"no","state":"received","content":"3 received request from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":61013,"type":"recieve","algorithm":"token","source":1,"dest":5,"direction":"1 to 5","token":"no","state":"received","content":"5 received request from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":61013,"type":"send","algorithm":"token","source":1,"dest":3,"direction":"1 to 3","token":"no","state":"sent","content":"1 sent request to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":61014,"type":"send","algorithm":"token","source":3,"dest":5,"direction":"3 to 5","token":"no","state":"sent","content":"3 sent request to 5 for 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":61014,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"sent","content":"5 sent commit message to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":61014,"type":"receive","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"received","content":"1 received commit message from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":61014,"type":"notice","algorithm":"token","source":4,"token":"yes","state":"enter cs","content":"node 4 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":63014,"type":"notice","algorithm":"token","source":4,"token":"no","state":"","content":"4 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":63014,"type":"recieve","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"received","content":"3 received token from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":63014,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"yes","state":"","content":"4 sent token to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":63014,"type":"notice","algorithm":"token","source":4,"token":"yes","state":"exit cs","content":"node 4 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":67015,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"sent","content":"1 sent commit message to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":67015,"type":"receive","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received commit message from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":67015,"type":"recieve","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"yes","state":"received","content":"3 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":67015,"type":"recieve","algorithm":"token","source":4,"dest":1,"direction":"4 to 1","token":"no","state":"received","content":"1 received request from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":67015,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent request to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":67015,"type":"send","algorithm":"token","source":3,"dest":1,"direction":"3 to 1","token":"yes","state":"sent","content":"3 sent request to 1 for 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":68015,"type":"notice","algorithm":"token","source":3,"token":"yes","state":"enter cs","content":"node 3 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":70015,"type":"notice","algorithm":"token","source":3,"token":"yes","state":"exit cs","content":"node 3 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":70016,"type":"notice","algorithm":"token","source":3,"token":"no","state":"","content":"3 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":70016,"type":"recieve","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received token from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":70016,"type":"send","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"yes","state":"","content":"3 sent token to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":73016,"type":"recieve","algorithm":"token","source":3,"dest":4,"direction":"3 to 4","token":"no","state":"received","content":"4 received request from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":73016,"type":"send","algorithm":"token","source":3,"dest":4,"direction":"3 to 4","token":"no","state":"sent","content":"3 sent request to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":73017,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent commit message to 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":73017,"type":"receive","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"received","content":"3 received commit message from 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":75017,"type":"notice","algorithm":"token","source":2,"token":"yes","state":"enter cs","content":"node 2 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":77017,"type":"notice","algorithm":"token","source":2,"token":"yes","state":"exit cs","content":"node 2 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":77017,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"yes","state":"","content":"2 sent token to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":77017,"type":"notice","algorithm":"token","source":2,"token":"no","state":"","content":"2 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":77017,"type":"recieve","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"received","content":"5 received token from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":81017,"type":"recieve","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"yes","state":"received","content":"5 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":81018,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"sent","content":"2 sent request to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":81018,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"yes","state":"sent","content":"5 sent request to 1 for 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":81018,"type":"recieve","algorithm":"token","source":2,"dest":1,"direction":"2 to 1","token":"no","state":"received","content":"1 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":81019,"type":"recieve","algorithm":"token","source":2,"dest":4,"direction":"2 to 4","token":"no","state":"received","content":"4 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":81019,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"sent","content":"1 sent request to 4 for 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":81019,"type":"receive","algorithm":"token","source":3,"dest":2,"direction":"3 to 2","token":"no","state":"received","content":"2 received commit message from 3"}
+{"time":"2025-01-06 23:57:04","duration_ms":81019,"type":"send","algorithm":"token","source":4,"dest":3,"direction":"4 to 3","token":"no","state":"sent","content":"4 sent request to 3 for 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":81019,"type":"recieve","algorithm":"token","source":2,"dest":3,"direction":"2 to 3","token":"no","state":"received","content":"3 received request from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":82018,"type":"notice","algorithm":"token","source":5,"token":"yes","state":"enter cs","content":"node 5 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":84018,"type":"notice","algorithm":"token","source":5,"token":"yes","state":"exit cs","content":"node 5 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":84018,"type":"send","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"yes","state":"","content":"5 sent token to 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":84018,"type":"notice","algorithm":"token","source":5,"token":"no","state":"","content":"5 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":84019,"type":"recieve","algorithm":"token","source":5,"dest":1,"direction":"5 to 1","token":"no","state":"received","content":"1 received token from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":87019,"type":"send","algorithm":"token","source":5,"dest":2,"direction":"5 to 2","token":"no","state":"sent","content":"5 sent request to 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":87019,"type":"recieve","algorithm":"token","source":5,"dest":2,"direction":"5 to 2","token":"no","state":"received","content":"2 received request from 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":87019,"type":"send","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"sent","content":"2 sent commit message to 5"}
+{"time":"2025-01-06 23:57:04","duration_ms":87019,"type":"receive","algorithm":"token","source":2,"dest":5,"direction":"2 to 5","token":"no","state":"received","content":"5 received commit message from 2"}
+{"time":"2025-01-06 23:57:04","duration_ms":89020,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"enter cs","content":"node 1 enter cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":91020,"type":"notice","algorithm":"token","source":1,"token":"yes","state":"exit cs","content":"node 1 exit cs"}
+{"time":"2025-01-06 23:57:04","duration_ms":91021,"type":"send","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"yes","state":"","content":"1 sent token to 4"}
+{"time":"2025-01-06 23:57:04","duration_ms":91021,"type":"notice","algorithm":"token","source":1,"token":"no","state":"","content":"1 released token"}
+{"time":"2025-01-06 23:57:04","duration_ms":91021,"type":"recieve","algorithm":"token","source":1,"dest":4,"direction":"1 to 4","token":"no","state":"received","content":"4 received token from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":94021,"type":"recieve","algorithm":"token","source":1,"dest":2,"direction":"1 to 2","token":"no","state":"received","content":"2 received request from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":94021,"type":"recieve","algorithm":"token","source":1,"dest":5,"direction":"1 to 5","token":"no","state":"received","content":"5 received request from 1"}
+{"time":"2025-01-06 23:57:04","duration_ms":94021,"type":"send","algorithm":"token","source":1,"dest":2,"direction":"1 to 2","token":"no","state":"sent","content":"1 sent request to 2"}
