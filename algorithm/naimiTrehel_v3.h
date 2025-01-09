@@ -42,7 +42,7 @@ private:
     std::thread listenerThread;
     std::thread pingPong;
 
-    const std::chrono::seconds T_msg{5};
+    const std::chrono::milliseconds T_msg{500};
     const std::chrono::seconds T_ping{5};
 
 public:
@@ -363,14 +363,14 @@ private:
     }
 
     void receivedAlive(int senderId) {
-        logger->log("recieve", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received i am alive from " + std::to_string(senderId));
+        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received i am alive from " + std::to_string(senderId));
         hasAlive = true;
         predecessorAlive = senderId;
         cv.notify_one();
     }
 
     void receivedRequest(int requesterId) {
-        logger->log("recieve", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received request from " + std::to_string(requesterId));
+        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received request from " + std::to_string(requesterId));
         if (last == id) {
             next = requesterId;
             nextUpdate = true;
@@ -382,7 +382,7 @@ private:
     }
 
     void receivedToken() {
-        logger->log("recieve", "token", predecessor, id, std::to_string(predecessor) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received token from " + std::to_string(predecessor));
+        logger->log("receive", "token", predecessor, id, std::to_string(predecessor) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received token from " + std::to_string(predecessor));
         hasToken = true;
         cv.notify_one();
     }

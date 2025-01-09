@@ -213,7 +213,7 @@ public:
     }
 
     /*
-        type: notice, send, receive
+        type: notice, send, receive, error
         algorithm: permission, token
         time: yyyy-dd-mm hh-mm-ss
         duration_ms: ...
@@ -233,9 +233,7 @@ public:
         if (dest != -1) {
             data["dest"] = dest;
         }
-        if (!direction.empty()) {
-            data["direction"] = direction;
-        }
+        data["direction"] = direction;
         if (algorithm == "permission") {
             data["permissible"] = permissionOrToken ? "yes" : "no";
         } else if (algorithm == "token") {

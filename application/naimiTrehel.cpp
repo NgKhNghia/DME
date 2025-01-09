@@ -30,7 +30,7 @@ void simulateNode(int id) {
         node.requestToken(); 
         {
             logger->log("notice", "token", id, -1, "", "yes", "enter cs", "node " + std::to_string(id) + " enter cs");
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::this_thread::sleep_for(std::chrono::minutes(20));
             logger->log("notice", "token", id, -1, "", "yes", "exit cs", "node " + std::to_string(id) + " exit cs");
         }
         node.releaseToken();
