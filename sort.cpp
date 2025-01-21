@@ -4,12 +4,31 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <ctime>
+#include <iomanip>
+#include <chrono>
 
 using json = nlohmann::ordered_json;
 using namespace std;
 
-bool compare_by_time_ms(const json& a, const json& b) {
-    return a["duration_ms"] < b["duration_ms"];
+std::chrono::milliseconds parse_time_to_milliseconds(const std::string& timeStr) {
+    std::tm tm = {};
+    std::istringstream ss(timeStr);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+
+    std::time_t timeInSeconds = std::mktime(&tm);
+    return std::chrono::milliseconds(timeInSeconds * 1000);
+}
+
+bool compare_by_total_time_ms(const json& a, const json& b) {
+    auto timeA = parse_time_to_milliseconds(a["time"]);
+    auto timeB = parse_time_to_milliseconds(b["time"]);
+
+    // Tổng thời gian: thời gian gốc + duration_ms (đã ở dạng mili giây)
+    std::chrono::milliseconds totalA = timeA + std::chrono::milliseconds(a["duration_ms"].get<int>());
+    std::chrono::milliseconds totalB = timeB + std::chrono::milliseconds(b["duration_ms"].get<int>());
+
+    return totalA < totalB;
 }
 
 int main() {
@@ -39,15 +58,15 @@ int main() {
         }
     }
 
-    // Sắp xếp các dòng theo trường "duration_ms"
-    sort(logs.begin(), logs.end(), compare_by_time_ms);
+    // Sắp xếp các dòng theo tổng thời gian (time + duration_ms) tính bằng mili giây
+    sort(logs.begin(), logs.end(), compare_by_total_time_ms);
 
     // Ghi lại các dòng đã sắp xếp vào file mới
     for (const auto& log : logs) {
         output << log.dump() << endl;
     }
 
-    cout << "Logs đã được sắp xếp và ghi vào file output_log.txt" << endl;
+    // cout << "Logs đã được sắp xếp và ghi vào file output_log.txt" << endl;
 
     return 0;
 }

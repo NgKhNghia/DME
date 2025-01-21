@@ -1,15 +1,15 @@
 #!/bin/bash
 
 
-# handle_exit() {
-#     kill ${pids[@]} 
-#     g++ sort.cpp -o sort
-#     ./sort
-#     exit
-# }
+handle_exit() {
+    kill ${pids[@]} 
+    g++ sort.cpp -o sort
+    ./sort
+    exit
+}
 
-# trap handle_exit SIGINT
-trap 'kill ${pids[@]}; exit' SIGINT
+trap handle_exit SIGINT
+# trap 'kill ${pids[@]}; exit' SIGINT
 
 # g++ application/lamport.cpp -o application/lamport -lpthread -Iframework -Ialgorithm
 # g++ application/tokenRing.cpp -o application/tokenRing -lpthread -Iframework -Ialgorithm -no-pie
@@ -29,7 +29,7 @@ for param in "${params[@]}"; do
     ./application/naimiTrehel "$param" &
 
     pids+=("$!")  
-    # sleep 0.000001 
+    sleep 0.01 
 done
 
 wait

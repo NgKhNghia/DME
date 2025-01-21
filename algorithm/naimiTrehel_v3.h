@@ -205,7 +205,7 @@ private:
     void mechanism2() {
         std::unique_lock<std::mutex> lock(mutexCheckFailure);
         std::string tmp = "";
-        for (int i = k - 1; i >= 0; i++) {
+        for (int i = k - 1; i >= 0; i--) {
             if (i != 0) {
                 tmp += std::to_string(predecessors[i]) + " ";
             } else {
@@ -329,7 +329,7 @@ private:
             }
             comm->send(i, "REGENERATED_TOKEN " + std::to_string(id));
         }
-        logger->log("send", "token", id, -1, "", hasToken, "broadcast", std::to_string(id) + "regenerated token");
+        logger->log("send", "token", id, -1, "", hasToken, "broadcast", std::to_string(id) + " regenerated token");
         cv.notify_one();
     }
 

@@ -1,5 +1,5 @@
-// #include "naimiTrehel_v1.h"
-// #include "naimiTrehel_v2.h"
+#include "naimiTrehel_v1.h"
+#include "naimiTrehel_v2.h"
 #include "naimiTrehel_v3.h"
 #include <random>
 
@@ -8,7 +8,7 @@ Logger* logger = nullptr;
 ErrorSimulator error;
 
 void simulateNode(int id) {
-    logger = new Logger(id, true, true, false);
+    logger = new Logger(id, true, true, true);
     std::string ip = config.getAddress(id);
     int port = config.getPort(id);
     std::shared_ptr<Comm> comm = std::make_shared<Comm>(id, port);
@@ -30,7 +30,7 @@ void simulateNode(int id) {
         node.requestToken(); 
         {
             logger->log("notice", "token", id, -1, "", "yes", "enter cs", "node " + std::to_string(id) + " enter cs");
-            std::this_thread::sleep_for(std::chrono::minutes(20));
+            std::this_thread::sleep_for(std::chrono::seconds(distrib(gen)));
             logger->log("notice", "token", id, -1, "", "yes", "exit cs", "node " + std::to_string(id) + " exit cs");
         }
         node.releaseToken();

@@ -30,14 +30,14 @@ public:
     NaimiTrehelV2(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
         : TokenBasedNode(id, ip, port, comm), last(1), next(-1), intoCS(false), nextUpdate(false), stopExtension(false) {
         hasToken = (id == 1);
-        logger->log(id, -1, "init");
+        logger->log("notice", "token", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
     }   
 
     ~NaimiTrehelV2() {
         if (listenerThread.joinable()) {
             listenerThread.join();
         }
-        logger->log(id, -1, "destroy");
+        logger->log("notice", "token", id, -1, "", hasToken, "destroy", "node " + std::to_string(id) + " destroy");
     }
 
     void initialize() override {
@@ -111,16 +111,16 @@ private:
     void sendToken(int destId) {
         std::string message = "TOKEN " + std::to_string(id);
         comm->send(destId, message);
-        logger->log(id, destId, std::to_string(id) + " send token to " + std::to_string(destId));
+        logger->log("send", "token", id, next, std::to_string(id) + " to " + std::to_string(next), hasToken, "", std::to_string(id) + " sent token to " + std::to_string(next));
     }
 
     void sendRequest(int destId, int requesterId) {
         std::string message = "REQUEST " + std::to_string(requesterId);
         comm->send(destId, message);
         if (id == requesterId) {
-            logger->log(id, destId, std::to_string(id) + " request token");
+            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId));
         } else {
-            logger->log(id, destId, std::to_string(id) + " send token request to " + std::to_string(destId) + " for " + std::to_string(requesterId));
+            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId) + " for " + std::to_string(requesterId));
         }
     }
 
@@ -134,7 +134,8 @@ private:
                     comm->send(i, "CONSULT " + std::to_string(id));
                 }
             }
-            logger->log(id, -1, std::to_string(id) + " send broadcast CONSULT");
+            // logger->log(id, -1, std::to_string(id) + " send broadcast CONSULT");
+            logger->log("send", "token", id, -1, "broadcast", hasToken, "sent", std::to_string(id) + " send broadcast CONSULT");
 
             if (cv.wait_for(lock, T_elec, [this]() { return hasRespond || hasToken || stopExtension; })) {
                 return; 
@@ -153,7 +154,8 @@ private:
                     comm->send(i, "FAILURE " + std::to_string(id));
                 }
             }
-            logger->log(id, -1, std::to_string(id) + " send broadcast FAILURE");
+            logger->log("send", "token", id, -1, "broadcast", hasToken, "sent", std::to_string(id) + " send broadcast FAILURE");
+
 
             if (cv.wait_for(lock, T_elec, [this]() { return hasExsit || hasToken || stopExtension; })) {
                 return; 
@@ -172,7 +174,8 @@ private:
                     comm->send(i, "ELECTION " + std::to_string(id));
                 }
             }
-            logger->log(id, -1, std::to_string(id) + " send broadcast ELECTION");
+            logger->log("send", "token", id, -1, "broadcast", hasToken, "sent", std::to_string(id) + " send broadcast ELECTION");
+            
             if (cv.wait_for(lock, T_elec, [this]() { return hasToken || stopExtension; })) {
                 return;
             }
@@ -194,7 +197,8 @@ private:
                 next = -1;
                 electedId.clear();
                 cv.notify_one();
-                logger->log(id, -1, "regenerated token");
+                logger->log("send", "token", id, -1, "", hasToken, "broadcast", std::to_string(id) + "regenerated token");
+
             }
 
             for (int i = 1; i <= config.getTotalNodes(); i++) {
@@ -202,20 +206,20 @@ private:
                     comm->send(i, "ELECTED " + std::to_string(id));
                 }
             }
-            logger->log(id, -1, "ELECTED token");
+            logger->log("send", "token", id, -1, "", hasToken, "broadcast", std::to_string(id) + "broadcast ELECTED");
         }
     }
 
     void receiveToken(int senderID) {
         std::unique_lock<std::mutex> lock(mtx);
         hasToken = true;
-        logger->log(id, id, std::to_string(id) + " received token from " + std::to_string(senderID));
+        logger->log("receive", "token", senderID, id, std::to_string(senderID) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received from " + std::to_string(senderID));
         cv.notify_one();
     }
 
     void receiveRequest(int requesterId) {
         std::unique_lock<std::mutex> lock(mtx);
-        logger->log(id, id, std::to_string(id) + " received token request from " + std::to_string(requesterId));
+        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received request from " + std::to_string(requesterId));
         if (id != last) {
             sendRequest(last, requesterId);
         } else if (hasToken && !intoCS) {
@@ -230,40 +234,42 @@ private:
 
     void receiveConsult(int senderId) {
         if (next == senderId) {
+            logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received RESPONE from " + std::to_string(senderId));
             comm->send(senderId, "RESPOND " + std::to_string(id));
-            logger->log(id, senderId, std::to_string(id) + " send RESPOND to " + std::to_string(senderId));
+            logger->log("send", "token", id, senderId, std::to_string(id) + " to " + std::to_string(senderId), hasToken, "", std::to_string(id) + " sent RESPONE to " + std::to_string(senderId));
         }
     }
 
     void receiveRespond(int senderId) {
         std::unique_lock<std::mutex> lock(mtx);
         hasRespond = true;
-        logger->log(id, id, std::to_string(id) + " received RESPOND from " + std::to_string(senderId));
+        logger->log("send", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received RESPONE from " + std::to_string(senderId));
         cv.notify_one();
     }
 
     void receiveFailure(int senderId) {
         if (hasToken) {
+            logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received EXSIT from " + std::to_string(senderId));
             comm->send(senderId, "EXSIT " + std::to_string(id));
-            logger->log(id, senderId, "token still EXSIT at " + std::to_string(id));
+            logger->log("send", "token", id, senderId, std::to_string(id) + " to " + std::to_string(senderId), hasToken, "", std::to_string(id) + " sent EXSIT to " + std::to_string(senderId));
         }
     }
 
     void receiveExsit(int senderId) {
         std::unique_lock<std::mutex> lock(mtx);
         hasExsit = true;
-        logger->log(id, id, std::to_string(id) + " received EXSIT from " + std::to_string(senderId));
+        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received ESXIT from " + std::to_string(senderId));
         cv.notify_one();
     }
 
     void receiveElection(int senderId) {
         std::unique_lock<std::mutex> lock(mtx);
         electedId[senderId] = true;
-        logger->log(id, id, std::to_string(id) + " received ELECTION from " + std::to_string(senderId));
+        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received ELECTION from " + std::to_string(senderId));
     }
 
     void receiveElected(int senderId) {
-        logger->log(id, id, std::to_string(id) + " received ELECTED from " + std::to_string(senderId));
+        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received ELECTED from " + std::to_string(senderId));
         {
             std::unique_lock<std::mutex> lock(mtx);
             next = -1;

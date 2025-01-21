@@ -22,14 +22,14 @@ public:
     NaimiTrehelV1(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
         : TokenBasedNode(id, ip, port, comm), last(1), next(-1), inCS(false), nextUpdate(false) {
         hasToken = (id == 1);
-        logger->log(id, -1, "init");
+        logger->log("notice", "token", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
     }   
 
     ~NaimiTrehelV1() {
         if (listenerThread.joinable()) {
             listenerThread.join();
         }
-        logger->log(id, -1, "destroy");
+        logger->log("notice", "token", id, -1, "", hasToken, "destroy", "node " + std::to_string(id) + " destroy");
     }
 
     void initialize() override {
@@ -73,6 +73,7 @@ private:
     void receiveToken() {
         std::unique_lock<std::mutex> lock(mtx);
         hasToken = true;
+        logger->log("receive", "token", id, -1, "", hasToken, "", std::to_string(id) + " received token");
         cv.notify_one();
     }
 
@@ -80,16 +81,16 @@ private:
         std::string message = "REQUEST " + std::to_string(requesterId);
         comm->send(destId, message);
         if (id == requesterId) {
-            logger->log(id, destId, "token request");
+            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId));
         } else {
-            logger->log(id, destId, "send token request for requester " + std::to_string(requesterId));
+            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId) + " for " + std::to_string(requesterId));
         }
     }
 
     void sendToken(int destId) {
         std::string message = "TOKEN " + std::to_string(id);
         comm->send(destId, message);
-        logger->log(id, destId, "send token to " + std::to_string(destId));
+        logger->log("send", "token", id, next, std::to_string(id) + " to " + std::to_string(next), hasToken, "", std::to_string(id) + " sent token to " + std::to_string(next));
     }
 
     void processMessage(const std::string& message) {

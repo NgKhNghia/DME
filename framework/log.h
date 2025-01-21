@@ -221,6 +221,7 @@ public:
         dest: ..., null
         direcion: a to b, broadcast, multicast
         token / permissible: yes, no
+        state: wait ...
         content: ..., null
     */
     void log(const std::string &type, const std::string &algorithm, int source, int dest, const std::string &direction, bool permissionOrToken, const std::string &state, const std::string &content) {

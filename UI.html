@@ -1,0 +1,497 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>D3.js Example with File Input</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            overflow: auto;
+            height: 100%;
+            width: 100%;
+        }
+        #info-container {
+            height: 30%; /* Chiếm 30% chiều cao màn hình */
+
+            resize: vertical;
+            overflow: auto;
+            border: 2px solid #000;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background-color: #f9f9f9;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        #container {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            height: 100%;
+        }
+        #chart-container {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+
+        }
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: lightgrey;
+            width: 100;
+        }
+    </style>
+</head>
+<body>
+   <div id="controls">
+      <input type="file" id="fileInput" />
+      <button id="autoRun">Auto Run</button>
+      <button id="pauseResume">Play</button>
+   </div>
+   <div id="container">
+      <div id="info-container">
+         <ul id="info-list" style="list-style-type: 
+
+none; padding: 0;"></ul>
+      </div>
+      <div id="chart-container"></div>
+   </div>
+ 
+    <script type="module">
+        let logs = [];
+        let logItems = [];
+        let svg;
+        let simulation;
+        let nodes = [];
+        let links = [];
+        let g;
+        let nodeElements, linkGroup, arrowElements;
+        let tokenNode;
+        let selectedLogIndex = -1;
+        let autoRunInterval = null;
+        let isPaused = true;
+        let colors;
+ 
+
+         document.getElementById('fileInput').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+               const reader = new FileReader();
+ 
+               reader.onload = function(e) {
+                  try {
+                     const content = e.target.result;
+                     logs = content.trim().split('\n').map(line => {
+                        try {
+                           const parsedLog = JSON.parse(line);
+                           return sanitizeLog(parsedLog);
+                        } catch (jsonError) {
+                           console.error("Invalid JSON in line:", line, jsonError);
+                           return null; // Loại bỏ dòng không hợp lệ
+                        }
+                     }).filter(log => log !== null);
+ 
+                     updateInfoList();
+                     initializeSimulation(logs);
+                  } catch (error) {
+                     console.error("Error parsing file:", error);
+                  }
+               };
+ 
+               reader.onerror = function() {
+                  console.error("Error reading file");
+               };
+ 
+               reader.readAsText(file);
+            }
+         });
+ 
+        
+
+ document.getElementById('autoRun').addEventListener('click', autoRunLogs);
+         document.getElementById('pauseResume').addEventListener('click', pauseResumeLogs);
+ 
+         function sanitizeLog(log) {
+               return {
+                  time: log.time || "N/A",
+                  duration_ms: log.duration_ms || "N/A",
+                  type: log.type || "N/A",
+                  algorithm: log.algorithm || "N/A",
+                  source: log.source || "N/A",
+                  dest: log.dest || "N/A",
+                  direction: log.direction || "N/A",
+                  token: log.token || "N/A",
+                  state: log.state || "N/A",
+                  content: log.content || "N/A"
+               };
+
+            }
+   
+         function updateInfoList() {
+            d3.select("#info-list").html("");
+            logItems = [];
+ 
+            const infoList = d3.select("#info-list");
+            logs.forEach((item, index) => {          
+               const logItem = infoList.append("li")
+                     .text(`${index + 1}. ${JSON.stringify(item)}`)
+                     .style("margin-bottom", "10px")
+                     .style("cursor", "pointer")
+                     .on("click", () => handleLogClick(index));
+               logItems.push(logItem);
+         });
+        }
+ 
+
+         document.addEventListener('keydown', (event) => {
+            if (logItems.length === 0 || isPaused === false) return;
+ 
+            if (event.key === 'ArrowDown') {
+               if (selectedLogIndex < logItems.length - 1) {
+                     selectedLogIndex++;
+                     highlightLog(selectedLogIndex);
+               }
+            } else if (event.key === 'ArrowUp') {
+               if (selectedLogIndex > 0) {
+                     selectedLogIndex--;
+                     highlightLog(selectedLogIndex);
+               }
+            }
+         });
+
+ 
+         function handleLogClick(index) {
+            selectedLogIndex = index;
+ 
+            highlightLog(selectedLogIndex);
+         }
+ 
+         function highlightLog(index) {
+            console.log("current log line: ", selectedLogIndex+1);
+ 
+            logItems.forEach(logItem => logItem.style("color", "black"));
+            logItems[index].style("color", "blue");
+ 
+            const filteredLogs = logs.slice(0, index + 1);
+            filteredLogs.forEach(log => {
+                if(log.token === "yes"){
+                  if(log.type === "send" || log.type === "notice"){
+
+                     tokenNode = log.source
+                  }
+                  else if(log.type === "recieve"){
+                     tokenNode = log.dest
+                  }
+                }
+            });
+            updateChart(filteredLogs);
+        }
+ 
+         function autoRunLogs() {
+            clearInterval(autoRunInterval);
+            selectedLogIndex = 0;
+            runningLog();
+            isPaused = false;
+            document.getElementById('pauseResume').textContent = 'Pause';
+         }
+ 
+         function runningLog(){
+
+            autoRunInterval = setInterval(() => {
+               if (selectedLogIndex >= logs.length) {
+                  clearInterval(autoRunInterval);
+                  return;
+               }
+               highlightLog(selectedLogIndex);
+               selectedLogIndex++;
+            }, 1000);
+         }
+ 
+         function pauseResumeLogs() {
+            console.log("isPause: ", !isPaused);
+            if (isPaused) {
+               runningLog();
+               isPaused = false;
+               document.getElementById('pauseResume').textContent = 'Pause';
+            } else {
+               clearInterval(autoRunInterval);
+
+               isPaused = true;
+               document.getElementById('pauseResume').textContent = 'Play';
+            }
+         }
+ 
+         function initializeSimulation(logs) {
+            console.log("logs: ", logs);
+            const width = 1280;
+            const height = 600;
+            svg = d3.select("#chart-container")
+                .append("svg")
+                .attr("viewBox", [-width / 2, -height / 2, width, height])
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().scaleExtent([1, 8]).on("zoom", zoomed));
+ 
+            g = svg.append("g");
+
+ 
+            nodes = Array.from(new Set(logs.map(log => log.source)), id => ({ id }));
+            console.log("nodes: ", nodes);
+ 
+            let linksMap = new Map();
+ 
+            logs.forEach(log => {
+               if (log.source && log.direction !== "N/A" && log.dest !== "N/A") {
+                  const key = `${log.source}-${log.dest}`;
+                 
+                  if (linksMap.has(key)) {
+                        let existingLink = linksMap.get(key);
+                        existingLink.type = log.type;
+                        existingLink.state = log.state;
+                  } else {
+                        linksMap.set(key, {
+
+                           source: log.source,
+                           target: log.dest,
+                           type: log.type,
+                           state: log.state,
+                           direct: log.direction
+                        });
+                  }
+               }
+            });
+ 
+            links = Array.from(linksMap.values());
+ 
+            console.log("links: ", links);
+ 
+            const directions = Array.from(new Set(links.map(link => link.direct)));
+            colors = d3.scaleOrdinal(directions, d3.schemeCategory10.filter(color => {
+               const rgb = d3.rgb(color);
+               // Kiểm tra nếu R, G, B gần bằng 
+
+nhau
+               return Math.abs(rgb.r - rgb.g) >= 10 || Math.abs(rgb.r - rgb.b) >= 10 || Math.abs(rgb.g - rgb.b) >= 10;})
+            );
+           
+            simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links)
+                    .id(d => d.id)
+                    .distance(100)
+                )
+                .force("charge", d3.forceManyBody().strength(-800))
+                .force("collision", d3.forceCollide().radius(25))
+                .force("center", d3.forceCenter())
+                .on("tick", ticked);
+ 
+ 
+            arrowElements = 
+
+svg.append("defs");
+            arrowElements.selectAll("marker")
+               .data(links, d => `${d.source.id}-${d.target.id}`)
+               .enter()
+               .append("marker")
+               .attr("id", d => `arrow-${d.source.id}-${d.target.id}`)
+               .attr("viewBox", "0 -5 10 10")
+               .attr("refX", d => 15 + (d.type === "send" ? 5 : 0))
+               .attr("refY", -0.5)
+               .attr("markerWidth", 6)
+               .attr("markerHeight", 6)
+               .attr("orient", "auto")
+               .append("path")
+               .attr("fill", d => d.type === "send" ? colors(d.direct) : "#999")
+               .attr("opacity", d =>{
+                  if(d.type !== "send" && d.state === "received"){
+
+                     return 0.3
+                  }
+                  else return 1
+                })
+               .attr("d", "M0,-5L10,0L0,5");
+               
+ 
+            linkGroup = g.append("g")
+               .attr("id", "link")
+               .attr("fill", "none")
+               .attr("stroke-width", 1.5)
+               ;
+            linkGroup.selectAll("path")
+               .data(links)
+               .enter().append("path")
+               .attr("stroke-width", 1.5)
+               .attr("stroke", d => {
+                     if (d.type === "send") {
+                           return colors(d.direct);//"#f0713e";
+                     } else {
+
+                           return "#999";
+                     }
+                  })
+               .attr("stroke-opacity", d =>{
+                  if(d.type !== "send" && d.state === "received"){
+                     return 0.3
+                  }
+                  else return 0.7
+                })
+               .attr("marker-end", d => `url(#arrow-${d.source.id}-${d.target.id}`, location);
+ 
+            nodeElements = g.append("g")
+               .attr("stroke", "black")
+               .attr("stroke-width", 1.5)
+               .selectAll("g")
+               .data(nodes)
+               .enter().append("g")
+               .call(d3.drag()
+
+                  .on("start", dragstarted)
+                  .on("drag", dragged)
+                  .on("end", dragended));
+ 
+            nodeElements.append("circle")
+               .attr("r", 10)
+               .attr("fill", "white");
+ 
+            nodeElements.append("text")
+               .attr("x", 0)
+               .attr("y", 5)
+               .attr("text-anchor", "middle")
+               .style("font-size", "12px")
+               .text(d => d.id);
+         }
+ 
+        function updateChart(filteredLogs) {
+ 
+            let linksMap = new Map();
+            filteredLogs.forEach(log => {
+               if (log.source && log.direction !== 
+
+"N/A" && log.dest !== "N/A") {
+                  const key = `${log.source}-${log.dest}`;
+                 
+                  if (linksMap.has(key)) {
+                        let existingLink = linksMap.get(key);
+                        existingLink.type = log.type;
+                        existingLink.state = log.state;
+                  } else {
+                        linksMap.set(key, {
+                           source: log.source,
+                           target: log.dest,
+                           type: log.type,
+                           state: log.state,
+                           direct: log.direction
+                        });
+                  }
+               }
+            });
+ 
+
+            let newLinks = Array.from(linksMap.values());
+ 
+            console.log("links: ", newLinks);
+ 
+            nodeElements.selectAll("circle")
+                .attr("fill", d => d.id === tokenNode ? "orange" : "white");
+ 
+            let arrow = arrowElements.selectAll("marker")
+                .data(newLinks);
+            arrow.exit().remove();
+ 
+            let newArrow = arrow
+                .enter()
+                .append("marker");
+ 
+            arrow.merge(newArrow)
+                .attr("id", d => `arrow-${d.source}-${d.target}`)
+
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", d => 15 + (d.type === "send" ? 5 : 0))
+                .attr("refY", -0.5)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .attr("opacity", d =>{
+                  if(d.type !== "send" && d.state === "received"){
+                     return 0.3
+                  }
+                  else return 1
+                })
+                .append("path")
+                .attr("fill", d => d.type === "send" ? colors(d.direct) : "#999")
+                .attr("d", "M0,-5L10,0L0,5")
+                ;
+           
+               let link = linkGroup.selectAll("path")
+
+                  .data(newLinks);
+ 
+               link.exit().remove();
+ 
+               let newLink = link.enter().append("path");
+ 
+               link = link.merge(newLink)
+                  .attr("stroke-width", 1.5)
+                  .attr("marker-end", d => `url(#arrow-${d.source}-${d.target})`)
+                  .transition()
+                  .duration(1000)
+                  .attr("stroke-opacity", d =>{
+                  if(d.type !== "send" && d.state === "received"){
+                     return 0.3
+                  }
+                  else return 0.7
+                  })
+                  .attr("stroke", d => {
+
+                     if (d.type === "send") {
+                           return colors(d.direct); // "#f0713e";
+                     } else {
+                           return "#999";
+                     }
+                  });
+               ticked();
+        }
+ 
+        function ticked() {
+            linkGroup.selectAll("path")
+               .data(links)
+               .attr("d", d => {
+                  const dx = d.target.x - d.source.x;
+                  const dy = d.target.y - d.source.y;
+                  const dr = Math.sqrt(dx * dx + dy * dy);
+                  return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+
+               });
+ 
+            nodeElements
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+        }
+ 
+        function zoomed(event) {
+            g.attr("transform", event.transform);
+        }
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+        function dragended(event) {
+
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+    </script>
+</body>
+</html>
