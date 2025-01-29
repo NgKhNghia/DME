@@ -311,7 +311,7 @@ private:
     }   
 
     void receivedSearchQueue(int requesterId) {
-        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + "received search queue from " + std::to_string(requesterId));
+        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received search queue from " + std::to_string(requesterId));
         if (!hasFailure) {
             comm->send(requesterId, "ACK_SEARCH_QUEUE " + std::to_string(id) + " " + std::to_string(position) + " " + std::to_string(next));
         } else {

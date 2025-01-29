@@ -55,30 +55,32 @@ public:
         return false;
     }
 
-    // // Giả lập lỗi mất gói tin
-    // bool simulateMessageLoss() {
-    //     if (triggerError(MESSAGE_LOSS)) {
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    // Giả lập lỗi mất gói tin
+    bool simulateMessageLoss(std::string& messageContent) {
+        if (triggerError(MESSAGE_LOSS)) {
+            messageContent = "";
+            return true;
+        }
+        return false;
+    }
 
-    // // Giả lập lỗi trễ gói tin
-    // bool simulateMessageDelay() {
-    //     if (triggerError(MESSAGE_DELAY)) {
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    // Giả lập lỗi trễ gói tin
+    bool simulateMessageDelay() {
+        if (triggerError(MESSAGE_DELAY)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            return true;
+        }
+        return false;
+    }
 
-    // // Giả lập gói tin đã bị thay đổi
-    // bool simulateMessageModified(std::string& messageContent) {
-    //     if (triggerError(MESSAGE_MODIFIED)) {
-    //         messageContent = messageContent + "(Modified)";  // Thay đổi nội dung tin nhắn
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    // Giả lập gói tin đã bị thay đổi
+    bool simulateMessageModified(std::string& messageContent) {
+        if (triggerError(MESSAGE_MODIFIED)) {
+            messageContent = messageContent + "(Modified)";  // Thay đổi nội dung tin nhắn
+            return true;
+        }
+        return false;
+    }
 
     
 };

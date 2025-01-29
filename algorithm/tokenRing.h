@@ -3,87 +3,130 @@
 #define TOKENRING_H
 
 #include "node.h"
-#include "comm.h"
+// #include "comm.h"
 #include "log.h"
 #include <thread>
 #include <random>
 #include <condition_variable>
 #include <mutex>
 
-extern Config config;
-extern Logger logger;
+// extern Config config;
+// extern Logger* logger;
 
-class TokenRingNode : public TokenBasedNode {
+class TokenRing : public TokenBasedNode {
 private:
-    bool token;
-    bool isRequestToken;    
-    int nextNode;  
+    int next;
+    int totalNodes;
+    bool needToken;
+
     std::mutex mtx;
+    std::mutex mtxMsg;
     std::condition_variable cv;
-    std::thread receiveTokenThread;
+
+    std::thread receiveThread;
 
 public:
-    TokenRingNode(int id, const std::string& ip, int port, std::shared_ptr<Comm<std::string>> comm)
-        : TokenBasedNode(id, ip, port, comm), isRequestToken(false) {
-        findNeighborNode();
+    TokenRing(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) : TokenBasedNode(id, ip, port, comm), needToken(false) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["init"] = "ok";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        logger->log("notice", id, std::to_string(id) + " init", note);
         initialize();  
     }
 
-    ~TokenRingNode() {
-        if (receiveTokenThread.joinable()) {
-            receiveTokenThread.join();
+    ~TokenRing() {
+        if (receiveThread.joinable()) {
+            receiveThread.join();
         }
-        logger.log("NOTI", id, "destroy");
-    }
-
-    void initialize() override {
-        logger.log("NOTI", id, "init");
-        if (id == 1) {
-            acquireToken();  
-        }
-        std::thread(&TokenRingNode::receiveTokenLoop, this);
-    }
-
-    void findNeighborNode() {
-        nextNode = id % config.getTotalNodes() + 1;  
     }
 
     void requestToken() override {
         std::unique_lock<std::mutex> lock(mtx);
-        if (!isRequestToken) {
-            logger.logToken("SEND", id, nextNode, "request token");
-            isRequestToken = true;
-            cv.wait(lock, [this] { return token; });
-        }
+        needToken = true;
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        logger->log("notice", id, std::to_string(id) + " request token", note);
+
+        cv.wait(lock, [this] { return hasToken; });
     }
 
     void releaseToken() override {
         std::unique_lock<std::mutex> lock(mtx);
-        token = false;
-        isRequestToken = false;
-        comm->send(nextNode, "TOKEN");  
-        logger.logToken("SEND", id, nextNode, "send token");
-    }
+        needToken = false;
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        logger->log("notice", id, std::to_string(id) + " release token", note);
 
-    void receiveToken() {
-        std::string message;
-        if (comm->getMessage(message)) {
-            if (message == "TOKEN") {
-                acquireToken();  
-            }
-        }
+        sendToken();
     }
 
 private:
-    void acquireToken() {
-        token = true;
-        logger.log("NOTI", id, "has token");
-        cv.notify_one();
+    void initialize() override {
+        totalNodes = config.getTotalNodes();
+        next = id % totalNodes + 1;
+        hasToken = (id == 1) ? true : false;
+
+        receiveThread = std::thread(&TokenRing::receiveMsg, this);
     }
 
-    void receiveTokenLoop() {
+    void sendToken() {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        hasToken = false;
+
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = next;
+        logger->log("send", id, std::to_string(id) + " send token to " + std::to_string(next), note);
+
+        comm->send(next, std::to_string(id) + " TOKEN");
+    }
+
+    void receivedToken(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        logger->log("recieve", id, std::to_string(id) + " received token from " + std::to_string(source), note);
+
+        hasToken = true;
+        if (needToken) {
+            cv.notify_one();
+        } else {
+            sendToken();
+        }
+    }
+
+    void processMsg(const std::string &msg) {
+        std::istringstream iss(msg);
+        int id;
+        std::string content;
+        iss >> id >> content;
+        if (content == "TOKEN") {
+            receivedToken(id);
+        }
+    }
+
+    void receiveMsg() {
+        std::string msg;
         while (true) {
-            receiveToken();  
+            if (comm->getMessage(msg)) {
+                processMsg(msg);
+            }
         }
     }
 };

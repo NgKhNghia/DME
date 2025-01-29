@@ -3,6 +3,7 @@
 #define NAIMITREHELV1_H
 
 #include "node.h"
+
 #include <memory>
 #include <mutex>
 #include <condition_variable>
@@ -12,103 +13,177 @@ class NaimiTrehelV1 : public TokenBasedNode {
 private:   
     int last;
     int next;
-    bool inCS;
-    bool nextUpdate;     // kiem tra xem co node nao moi request hay khong
+    bool freetime;
+
     std::mutex mtx;
+    std::mutex mtxMsg;
     std::condition_variable cv;
-    std::thread listenerThread;
+
+    std::thread receiveThread;
 
 public:
     NaimiTrehelV1(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
-        : TokenBasedNode(id, ip, port, comm), last(1), next(-1), inCS(false), nextUpdate(false) {
+        : TokenBasedNode(id, ip, port, comm), last(1), next(-1), freetime(true) {
         hasToken = (id == 1);
-        logger->log("notice", "token", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["init"] = "ok";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " init", note);
+
+        initialize();
     }   
 
     ~NaimiTrehelV1() {
-        if (listenerThread.joinable()) {
-            listenerThread.join();
+        if (receiveThread.joinable()) {
+            receiveThread.join();
         }
-        logger->log("notice", "token", id, -1, "", hasToken, "destroy", "node " + std::to_string(id) + " destroy");
-    }
-
-    void initialize() override {
-        listenerThread = std::thread(&NaimiTrehelV1::listenForMessages, this);
     }
 
     void requestToken() override {
         std::unique_lock<std::mutex> lock(mtx);
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " request token", note);
+
         if (!hasToken) {
-            sendRequest(last, id);
-            last = id;
-            cv.wait(lock, [this] { return hasToken; });
+            sendRequest(id, last);
+            freetime = false;
+            cv.wait(lock, [this] { 
+                return hasToken; 
+            });
         }
-        inCS = true;
     }
 
     void releaseToken() override {
-        inCS = false;
-        if (nextUpdate) {
+        std::unique_lock<std::mutex> lock(mtx);
+        freetime = true;
+        
+        if (next != -1) {
+            // hasToken = false;
             sendToken(next);
-            hasToken = false;
-            nextUpdate = false;
+            next = -1;
+
+            json note;
+            note["status"] = "null";
+            note["error"] = "null";
+            note["source"] = "null";
+            note["dest"] = "null";
+            note["last"] = last;
+            note["next"] = "null";
+            logger->log("notice", id, std::to_string(id) + " release", note);
         }
     }
 
 private:
-    void receiveRequest(int requesterId) {
-        std::unique_lock<std::mutex> lock(mtx);
-        if (last != id) {
-            sendRequest(last, requesterId);
-        } else if (hasToken && !inCS) {
-            sendToken(requesterId);
-            hasToken = false;
-        } else {
-            next = requesterId;
-            nextUpdate = true;
-        }
-        last = requesterId;
+    void initialize() override {
+        receiveThread = std::thread(&NaimiTrehelV1::receiveMsg, this);
     }
 
-    void receiveToken() {
-        std::unique_lock<std::mutex> lock(mtx);
+    void receivedRequest(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = source;
+        note["next"] = (next != -1) ? next : (freetime) ? -1 : source;
+        logger->log("receive", id, std::to_string(id) + " received request from " + std::to_string(source), note);
+
+        if (id != last) {
+            sendRequest(source, last);
+        } else {
+            next = source;
+            last = source;
+            if (freetime) {
+                releaseToken();
+            }
+        }
+        // last = requesterId;
+    }
+
+    void receivedToken(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
         hasToken = true;
-        logger->log("receive", "token", id, -1, "", hasToken, "", std::to_string(id) + " received token");
+
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received token", note);
+
         cv.notify_one();
     }
 
-    void sendRequest(int destId, int requesterId) {
-        std::string message = "REQUEST " + std::to_string(requesterId);
-        comm->send(destId, message);
-        if (id == requesterId) {
-            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId));
+    void sendRequest(int source, int dest) {
+        std::string message = std::to_string(source) + " REQUEST";
+        last = source;
+
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        if (id == source) {
+            logger->log("send", id, std::to_string(id) + " sent request to " + std::to_string(dest), note);
         } else {
-            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId) + " for " + std::to_string(requesterId));
+            logger->log("send", id, std::to_string(id) + " sent request to " + std::to_string(dest) + " for " + std::to_string(source), note);
         }
+        
+        comm->send(dest, message);
     }
 
-    void sendToken(int destId) {
-        std::string message = "TOKEN " + std::to_string(id);
-        comm->send(destId, message);
-        logger->log("send", "token", id, next, std::to_string(id) + " to " + std::to_string(next), hasToken, "", std::to_string(id) + " sent token to " + std::to_string(next));
+    void sendToken(int dest) {
+        std::string message = std::to_string(id) + " TOKEN";
+        hasToken = false;
+
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent token to " + std::to_string(dest), note);
+
+        comm->send(dest, message);
     }
 
     void processMessage(const std::string& message) {
         std::istringstream iss(message);
-        std::string msgType;
-        int senderId;
-        iss >> msgType >> senderId;
+        std::string msg;
+        int source;
+        iss >> source >> msg;
 
-        if (msgType == "REQUEST") {
-            receiveRequest(senderId);
-        } else if (msgType == "TOKEN") {
-            receiveToken();
+        if (msg == "REQUEST") {
+            receivedRequest(source);
+        } else if (msg == "TOKEN") {
+            receivedToken(source);
         }
     }
 
-    void listenForMessages() {
+    void receiveMsg() {
+        std::string message;
         while (true) {
-            std::string message;
+            message = "";
             if (comm->getMessage(message)) {
                 processMessage(message);
             }

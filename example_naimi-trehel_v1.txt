@@ -1,0 +1,123 @@
+{"timeInit":"2025-01-29 12:45:09","duration_ms":0,"type":"notice","id":1,"content":"1 init","note":{"status":"ok","init":"ok","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":0,"type":"notice","id":2,"content":"2 init","note":{"status":"null","init":"ok","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":0,"type":"notice","id":3,"content":"3 init","note":{"status":"null","init":"ok","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":0,"type":"notice","id":4,"content":"4 init","note":{"status":"null","init":"ok","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":3000,"type":"notice","id":2,"content":"2 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":3000,"type":"send","id":2,"content":"2 sent request to 1","note":{"status":"null","error":"null","source":2,"dest":1,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":3013,"type":"receive","id":1,"content":"1 received request from 2","note":{"status":"ok","error":"null","source":2,"dest":1,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":3013,"type":"send","id":1,"content":"1 sent token to 2","note":{"status":"null","error":"null","source":1,"dest":2,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":3013,"type":"notice","id":1,"content":"1 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":2,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":3001,"type":"receive","id":2,"content":"2 received token","note":{"status":"ok","error":"null","source":1,"dest":2,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":3001,"type":"notice","id":2,"content":"2 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5000,"type":"notice","id":1,"content":"1 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5000,"type":"send","id":1,"content":"1 sent request to 2","note":{"status":"null","error":"null","source":1,"dest":2,"last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":4989,"type":"receive","id":2,"content":"2 received request from 1","note":{"status":"ok","error":"null","source":1,"dest":2,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5000,"type":"notice","id":3,"content":"3 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5000,"type":"send","id":3,"content":"3 sent request to 1","note":{"status":"null","error":"null","source":3,"dest":1,"last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5023,"type":"receive","id":1,"content":"1 received request from 3","note":{"status":"null","error":"null","source":3,"dest":1,"last":3,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5000,"type":"notice","id":4,"content":"4 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5000,"type":"send","id":4,"content":"4 sent request to 1","note":{"status":"null","error":"null","source":4,"dest":1,"last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5035,"type":"receive","id":1,"content":"1 received request from 4","note":{"status":"null","error":"null","source":4,"dest":1,"last":4,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5035,"type":"send","id":1,"content":"1 sent request to 3 for 4","note":{"status":"null","error":"null","source":4,"dest":3,"last":4,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":5012,"type":"receive","id":3,"content":"3 received request from 4","note":{"status":"null","error":"null","source":4,"dest":3,"last":4,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":8002,"type":"notice","id":2,"content":"2 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":8002,"type":"send","id":2,"content":"2 sent token to 1","note":{"status":"null","error":"null","source":2,"dest":1,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":8002,"type":"notice","id":2,"content":"2 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":1,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":8014,"type":"receive","id":1,"content":"1 received token","note":{"status":"ok","error":"null","source":2,"dest":1,"last":4,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":8014,"type":"notice","id":1,"content":"1 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":11015,"type":"notice","id":1,"content":"1 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":11015,"type":"send","id":1,"content":"1 sent token to 3","note":{"status":"null","error":"null","source":1,"dest":3,"last":4,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":11015,"type":"notice","id":1,"content":"1 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":4,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":10992,"type":"receive","id":3,"content":"3 received token","note":{"status":"ok","error":"null","source":1,"dest":3,"last":4,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":10992,"type":"notice","id":3,"content":"3 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":12003,"type":"notice","id":2,"content":"2 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":12003,"type":"send","id":2,"content":"2 sent request to 1","note":{"status":"null","error":"null","source":2,"dest":1,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":12015,"type":"receive","id":1,"content":"1 received request from 2","note":{"status":"null","error":"null","source":2,"dest":1,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":12015,"type":"send","id":1,"content":"1 sent request to 4 for 2","note":{"status":"null","error":"null","source":2,"dest":4,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":11981,"type":"receive","id":4,"content":"4 received request from 2","note":{"status":"null","error":"null","source":2,"dest":4,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":15015,"type":"notice","id":1,"content":"1 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":15015,"type":"send","id":1,"content":"1 sent request to 2","note":{"status":"null","error":"null","source":1,"dest":2,"last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":14992,"type":"notice","id":3,"content":"3 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":14992,"type":"send","id":3,"content":"3 sent token to 4","note":{"status":"null","error":"null","source":3,"dest":4,"last":4,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":15004,"type":"receive","id":2,"content":"2 received request from 1","note":{"status":"null","error":"null","source":1,"dest":2,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":14993,"type":"notice","id":3,"content":"3 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":4,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":14981,"type":"receive","id":4,"content":"4 received token","note":{"status":"ok","error":"null","source":3,"dest":4,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":14981,"type":"notice","id":4,"content":"4 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":17993,"type":"notice","id":3,"content":"3 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":17993,"type":"send","id":3,"content":"3 sent request to 4","note":{"status":"null","error":"null","source":3,"dest":4,"last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":17982,"type":"notice","id":4,"content":"4 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":17982,"type":"send","id":4,"content":"4 sent token to 2","note":{"status":"null","error":"null","source":4,"dest":2,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":17982,"type":"notice","id":4,"content":"4 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":2,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":17982,"type":"receive","id":4,"content":"4 received request from 3","note":{"status":"null","error":"null","source":3,"dest":4,"last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":18005,"type":"receive","id":2,"content":"2 received token","note":{"status":"ok","error":"null","source":4,"dest":2,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":17982,"type":"send","id":4,"content":"4 sent request to 2 for 3","note":{"status":"null","error":"null","source":3,"dest":2,"last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":18005,"type":"notice","id":2,"content":"2 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":18005,"type":"receive","id":2,"content":"2 received request from 3","note":{"status":"ok","error":"null","source":3,"dest":2,"last":3,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":18005,"type":"send","id":2,"content":"2 sent request to 1 for 3","note":{"status":"null","error":"null","source":3,"dest":1,"last":3,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":18017,"type":"receive","id":1,"content":"1 received request from 3","note":{"status":"null","error":"null","source":3,"dest":1,"last":3,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21005,"type":"notice","id":2,"content":"2 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21005,"type":"send","id":2,"content":"2 sent token to 1","note":{"status":"null","error":"null","source":2,"dest":1,"last":3,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21005,"type":"notice","id":2,"content":"2 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":3,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21017,"type":"receive","id":1,"content":"1 received token","note":{"status":"ok","error":"null","source":2,"dest":1,"last":3,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21017,"type":"notice","id":1,"content":"1 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21982,"type":"notice","id":4,"content":"4 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21982,"type":"send","id":4,"content":"4 sent request to 3","note":{"status":"null","error":"null","source":4,"dest":3,"last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":21994,"type":"receive","id":3,"content":"3 received request from 4","note":{"status":"null","error":"null","source":4,"dest":3,"last":4,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":25005,"type":"notice","id":2,"content":"2 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":25005,"type":"send","id":2,"content":"2 sent request to 3","note":{"status":"null","error":"null","source":2,"dest":3,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":24994,"type":"receive","id":3,"content":"3 received request from 2","note":{"status":"null","error":"null","source":2,"dest":3,"last":2,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":24994,"type":"send","id":3,"content":"3 sent request to 4 for 2","note":{"status":"null","error":"null","source":2,"dest":4,"last":2,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":24984,"type":"receive","id":4,"content":"4 received request from 2","note":{"status":"null","error":"null","source":2,"dest":4,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":26017,"type":"notice","id":1,"content":"1 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":26017,"type":"send","id":1,"content":"1 sent token to 3","note":{"status":"null","error":"null","source":1,"dest":3,"last":3,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":26018,"type":"notice","id":1,"content":"1 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":3,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":25995,"type":"receive","id":3,"content":"3 received token","note":{"status":"ok","error":"null","source":1,"dest":3,"last":2,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":25995,"type":"notice","id":3,"content":"3 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":29995,"type":"notice","id":3,"content":"3 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":29995,"type":"send","id":3,"content":"3 sent token to 4","note":{"status":"null","error":"null","source":3,"dest":4,"last":2,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":29995,"type":"notice","id":3,"content":"3 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":2,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":29984,"type":"receive","id":4,"content":"4 received token","note":{"status":"ok","error":"null","source":3,"dest":4,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":29984,"type":"notice","id":4,"content":"4 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":31018,"type":"notice","id":1,"content":"1 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":31018,"type":"send","id":1,"content":"1 sent request to 3","note":{"status":"null","error":"null","source":1,"dest":3,"last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":30995,"type":"receive","id":3,"content":"3 received request from 1","note":{"status":"null","error":"null","source":1,"dest":3,"last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":30995,"type":"send","id":3,"content":"3 sent request to 2 for 1","note":{"status":"null","error":"null","source":1,"dest":2,"last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":31007,"type":"receive","id":2,"content":"2 received request from 1","note":{"status":"null","error":"null","source":1,"dest":2,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":33996,"type":"notice","id":3,"content":"3 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":33996,"type":"send","id":3,"content":"3 sent request to 1","note":{"status":"null","error":"null","source":3,"dest":1,"last":3,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":33985,"type":"notice","id":4,"content":"4 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":33985,"type":"send","id":4,"content":"4 sent token to 2","note":{"status":"null","error":"null","source":4,"dest":2,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":34019,"type":"receive","id":1,"content":"1 received request from 3","note":{"status":"null","error":"null","source":3,"dest":1,"last":3,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":33985,"type":"notice","id":4,"content":"4 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":2,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":34008,"type":"receive","id":2,"content":"2 received token","note":{"status":"ok","error":"null","source":4,"dest":2,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":34008,"type":"notice","id":2,"content":"2 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37008,"type":"notice","id":2,"content":"2 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37008,"type":"send","id":2,"content":"2 sent token to 1","note":{"status":"null","error":"null","source":2,"dest":1,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37009,"type":"notice","id":2,"content":"2 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":1,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37021,"type":"receive","id":1,"content":"1 received token","note":{"status":"ok","error":"null","source":2,"dest":1,"last":3,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37021,"type":"notice","id":1,"content":"1 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37985,"type":"notice","id":4,"content":"4 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37985,"type":"send","id":4,"content":"4 sent request to 2","note":{"status":"null","error":"null","source":4,"dest":2,"last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":38008,"type":"receive","id":2,"content":"2 received request from 4","note":{"status":"null","error":"null","source":4,"dest":2,"last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":38008,"type":"send","id":2,"content":"2 sent request to 1 for 4","note":{"status":"null","error":"null","source":4,"dest":1,"last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":38020,"type":"receive","id":1,"content":"1 received request from 4","note":{"status":"ok","error":"null","source":4,"dest":1,"last":4,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":38020,"type":"send","id":1,"content":"1 sent request to 3 for 4","note":{"status":"null","error":"null","source":4,"dest":3,"last":4,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":37997,"type":"receive","id":3,"content":"3 received request from 4","note":{"status":"null","error":"null","source":4,"dest":3,"last":4,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":40021,"type":"notice","id":1,"content":"1 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":40021,"type":"send","id":1,"content":"1 sent token to 3","note":{"status":"null","error":"null","source":1,"dest":3,"last":4,"next":3}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":40021,"type":"notice","id":1,"content":"1 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":4,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":39998,"type":"receive","id":3,"content":"3 received token","note":{"status":"ok","error":"null","source":1,"dest":3,"last":4,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":39998,"type":"notice","id":3,"content":"3 enter critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":41009,"type":"notice","id":2,"content":"2 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":41009,"type":"send","id":2,"content":"2 sent request to 4","note":{"status":"null","error":"null","source":2,"dest":4,"last":2,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":40986,"type":"receive","id":4,"content":"4 received request from 2","note":{"status":"null","error":"null","source":2,"dest":4,"last":2,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":43022,"type":"notice","id":1,"content":"1 request token","note":{"status":"null","error":"null","source":"null","dest":"null","last":4,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":43022,"type":"send","id":1,"content":"1 sent request to 4","note":{"status":"null","error":"null","source":1,"dest":4,"last":1,"next":-1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":42999,"type":"notice","id":3,"content":"3 exit critical section","note":{"status":"ok"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":42999,"type":"send","id":3,"content":"3 sent token to 4","note":{"status":"null","error":"null","source":3,"dest":4,"last":4,"next":4}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":42988,"type":"receive","id":4,"content":"4 received request from 1","note":{"status":"null","error":"null","source":1,"dest":4,"last":1,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":42988,"type":"send","id":4,"content":"4 sent request to 2 for 1","note":{"status":"null","error":"null","source":1,"dest":2,"last":1,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":42999,"type":"notice","id":3,"content":"3 release","note":{"status":"null","error":"null","source":"null","dest":"null","last":4,"next":"null"}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":42988,"type":"receive","id":4,"content":"4 received token","note":{"status":"ok","error":"null","source":3,"dest":4,"last":1,"next":2}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":43011,"type":"receive","id":2,"content":"2 received request from 1","note":{"status":"null","error":"null","source":1,"dest":2,"last":1,"next":1}}
+{"timeInit":"2025-01-29 12:45:09","duration_ms":42988,"type":"notice","id":4,"content":"4 enter critical section","note":{"status":"ok"}}

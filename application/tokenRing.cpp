@@ -1,35 +1,32 @@
-// mainTokenRing.cpp
 #include "tokenRing.h"
-// #include <csignal>
 
-// bool running = true;
-
-// void signalHandler(int signal) {
-//     if (signal == SIGINT) {
-//         running = false;
-//         logger.~Logger();
-//     }
-// }
-
-Logger logger(true, true);
+Logger *logger = nullptr;
 Config config;
+ErrorSimulator error;
 
 void simulate(int id) {
-    std::string ip = config.getNodeIp(id);
-    int port = config.getNodePort(id);
-    std::shared_ptr<Comm<std::string>> comm = std::make_shared<Comm<std::string>>(id, port);  
-    TokenRingNode node(id, ip, port, comm); 
+    logger = new Logger(id, true, true, false);
+    std::string ip = config.getAddress(id);
+    int port = config.getPort(id);
+    std::shared_ptr<Comm> comm = std::make_shared<Comm>(id, port);  
+    TokenRing node(id, ip, port, comm); 
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(0, 5);
+    std::uniform_int_distribution<> distrib(1, 10);
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(distrib(gen)));
         node.requestToken();
         {
-            logger.log("NOTI", id, "enter cs");
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            json note;
+            note["status"] = "ok";
+            note["error"] = "null";
+            note["source"] = "null";
+            note["dest"] = "null";
+            logger->log("notice", id, std::to_string(id) + " enter critical section", note);
+            std::this_thread::sleep_for(std::chrono::seconds(distrib(gen)));
+            logger->log("notice", id, std::to_string(id) + " exit critical section", note);
         }
         node.releaseToken();
     }
@@ -40,9 +37,8 @@ int main(int argc, char* argv[]) {
         std::cerr << "Usage: " << argv[0] << " <node_id>" << std::endl;
         return 1;
     }
-    // std::signal(SIGINT, signalHandler);
-    int id = std::stoi(argv[1]);
 
+    int id = std::stoi(argv[1]);
     simulate(id);
 
     return 0;

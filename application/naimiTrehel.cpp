@@ -1,6 +1,6 @@
 #include "naimiTrehel_v1.h"
-#include "naimiTrehel_v2.h"
-#include "naimiTrehel_v3.h"
+// #include "naimiTrehel_v2.h"
+// #include "naimiTrehel_v3.h"
 #include <random>
 
 Config config;
@@ -8,15 +8,16 @@ Logger* logger = nullptr;
 ErrorSimulator error;
 
 void simulateNode(int id) {
-    logger = new Logger(id, true, true, true);
+    logger = new Logger(id, true, false, false);
     std::string ip = config.getAddress(id);
     int port = config.getPort(id);
     std::shared_ptr<Comm> comm = std::make_shared<Comm>(id, port);
-    // NaimiTrehelV1 node(id, ip, port, comm);
+    NaimiTrehelV1 node(id, ip, port, comm);
     // NaimiTrehelV2 node(id, ip, port, comm);
-    NaimiTrehelV3 node(id, ip, port, 2, comm);
-    node.initialize();
-    // error.setErrorProbability(NETWORK_ERROR, 0.9);
+    // NaimiTrehelV3 node(id, ip, port, 2, comm);
+    
+    // if (id == 3) 
+    //     error.setErrorProbability(NETWORK_ERROR, 0.3);
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -29,9 +30,11 @@ void simulateNode(int id) {
         error.simulateNetworkError();
         node.requestToken(); 
         {
-            logger->log("notice", "token", id, -1, "", "yes", "enter cs", "node " + std::to_string(id) + " enter cs");
+            json note;
+            note["status"] = "ok";
+            logger->log("notice", id, std::to_string(id) + " enter critical section", note);
             std::this_thread::sleep_for(std::chrono::seconds(distrib(gen)));
-            logger->log("notice", "token", id, -1, "", "yes", "exit cs", "node " + std::to_string(id) + " exit cs");
+            logger->log("notice", id, std::to_string(id) + " exit critical section", note);
         }
         node.releaseToken();
     }

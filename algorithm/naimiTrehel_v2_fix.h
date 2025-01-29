@@ -21,7 +21,7 @@ private:
     std::map<int, bool> electedId;      // luu tru nhung node yeu cau tai tao token
     std::mutex mtx;
     std::condition_variable cv;
-    std::thread receiveThread;
+    std::thread listenerThread;
 
     const std::chrono::seconds T_wait{5};
     const std::chrono::seconds T_elec{5};
@@ -30,18 +30,18 @@ public:
     NaimiTrehelV2(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
         : TokenBasedNode(id, ip, port, comm), last(1), next(-1), intoCS(false), nextUpdate(false), stopExtension(false) {
         hasToken = (id == 1);
-        logger->log("notice", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
+        logger->log("notice", "token", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
     }   
 
     ~NaimiTrehelV2() {
-        if (receiveThread.joinable()) {
-            receiveThread.join();
+        if (listenerThread.joinable()) {
+            listenerThread.join();
         }
         logger->log("notice", "token", id, -1, "", hasToken, "destroy", "node " + std::to_string(id) + " destroy");
     }
 
     void initialize() override {
-        receiveThread = std::thread(&NaimiTrehelV2::receiveMsg, this);
+        listenerThread = std::thread(&NaimiTrehelV2::listenForMessages, this);
     }
 
     void requestToken() override {
@@ -289,7 +289,7 @@ private:
 
     
 
-    void receiveMsg() {
+    void listenForMessages() {
         while (true) {
             std::string message;
             if (comm->getMessage(message)) {

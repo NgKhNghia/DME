@@ -4,193 +4,180 @@
 
 #include "node.h"
 #include "log.h"
-#include <atomic>
 #include <mutex>
-#include <queue>
-#include <map>
+#include <thread>
 #include <vector>
-#include <string>
-#include <algorithm>
-#include <random>
+#include <set>
+#include <queue>
+#include <condition_variable>
 
-extern Logger logger;
+class Lamport : public PermissonBasedNode {
+private: 
+    typedef struct Request {
+        int id;
+        int timestamp;
+        bool operator<(const Request &other) const { // min-heap
+            return (timestamp > other.timestamp) || (timestamp == other.timestamp && id > other.id);
+        }
+        bool operator>(const Request &other) const { // map-heap
+            return (timestamp < other.timestamp) || (timestamp == other.timestamp && id < other.id);
+        }
+    } REQUEST;
 
-enum MessageType { REQUEST, REPLY, RELEASE }; // Định nghĩa các loại tin nhắn
+    int totalNodes;
+    int globalTimestamp;  
+    int localTimestamp;
+    std::priority_queue<REQUEST, std::vector<REQUEST>, std::less<REQUEST>> listRqt;
+    std::set<int> listReply;
 
-struct Message {
-    int senderId;            // ID của nút gửi tin nhắn
-    int timestamp;           // Dấu thời gian của tin nhắn
-    MessageType type;        // Loại tin nhắn (REQUEST, REPLY, hoặc RELEASE)
-    std::string content;     // Nội dung tin nhắn
-};
+    std::thread receiveThread;
 
-class LamportNode : public PermissonBasedNode {
-private:
-    std::atomic<int> timeStamp;  
-    std::priority_queue<Message, std::vector<Message>, bool(*)(const Message&, const Message&)> requestQueue; 
-    std::mutex queueMutex;  
-    std::map<int, bool> replyReceived;  
-
-    static bool compareMessages(const Message &m1, const Message &m2) {
-        return (m1.timestamp > m2.timestamp) || 
-               (m1.timestamp == m2.timestamp && m1.senderId > m2.senderId);
-    }
-
+    std::mutex mtx;
+    std::mutex mtxMsg;
+    std::condition_variable cv;
 public:
-    LamportNode(int id, const std::string& ip, int port, std::shared_ptr<Comm<std::string>> comm)
-        : PermissonBasedNode(id, ip, port, comm), timeStamp(0), requestQueue(compareMessages) {
+    Lamport(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm)
+        : PermissonBasedNode(id, ip, port, comm), globalTimestamp(0), localTimestamp(0) {
+            json note;
+            note["status"] = "null";
+            note["init"] = "ok";
+            note["error"] = "null";
+            note["source"] = "null";
+            note["dest"] = "null";
+            logger->log("notice", id, std::to_string(id) + " init", note);
+            totalNodes = config.getTotalNodes();
             initialize();
-        }
-
-    ~LamportNode() override {
-        logger.log("NOTI", id, "destroyed");
     }
 
+    ~Lamport() {
+        if (receiveThread.joinable()) {
+            receiveThread.join();
+        }
+    }
+
+    void requestPermission() override {
+        std::unique_lock<std::mutex> lock(mtx);
+        globalTimestamp++;
+        localTimestamp = globalTimestamp;
+        REQUEST rqt = {id, localTimestamp};
+        listRqt.push(rqt);
+        for (int i = 1; i <= totalNodes; i++) {
+            if (i == id) {
+                continue;
+            }
+            comm->send(i, std::to_string(rqt.id) + " REQUEST " + std::to_string(rqt.timestamp)); // id type timestamp
+        }
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = "broadcast";
+        logger->log("send", id, std::to_string(id) + " sent request broadcast", note);
+        cv.wait(lock, [this]() { 
+            return (listReply.size() == totalNodes - 1) && (listRqt.top().id == id); 
+        });
+    }
+
+    void releasePermission() override {
+        std::unique_lock<std::mutex> lock(mtx);
+        listRqt.pop();
+        listReply.clear();
+        for (int i = 1; i <= totalNodes; i++) {
+            if (i == id) {
+                continue;
+            }
+            comm->send(i, std::to_string(id) + " RELEASE " + std::to_string(localTimestamp));
+        }
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = "broadcast";
+        logger->log("send", id, std::to_string(id) + " sent release broadcast", note);
+    }
+
+private:
     void initialize() override {
-        logger.log("NOTI", id, "init");
-        startThread();  
+        receiveThread = std::thread(&Lamport::receiveMsg, this);
     }
 
-    void startThread() {
-        std::thread([&] {
-            while (1) {
-                receiveMessage();
-            }
-        }).detach();
+    void sendAgree(int dest, int timestamp) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        comm->send(dest, std::to_string(id) + " OK " + std::to_string(timestamp));
+        json note;
+        note["status"] = (listReply.size() == totalNodes - 1) && (listRqt.top().id == id) ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        logger->log("send", id, std::to_string(id) + " sent ok to " + std::to_string(dest), note);
     }
 
-    int getTimestamp() const {
-        return timeStamp.load();
+    void receivedRqt(int source, int timestamp) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = (listReply.size() == totalNodes - 1) && (listRqt.top().id == id) ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        logger->log("receive", id, std::to_string(id) + " received request from " + std::to_string(source), note);
+    
+        globalTimestamp = std::max(globalTimestamp, timestamp) + 1;
+        REQUEST rqt = {source, timestamp};
+        listRqt.push(rqt);
     }
 
-    void incrementTimestamp() {
-        timeStamp++;
+    void receivedAgree(int source, int timestamp) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = (listReply.size() == totalNodes - 1) && (listRqt.top().id == id) ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        logger->log("receive", id, std::to_string(id) + " received ok from " + std::to_string(source), note);
+
+        listReply.insert(source);
+        cv.notify_one();
     }
 
-    void sendMessage(int receiverId, MessageType type, const std::string& content = "") {
-        incrementTimestamp();
-        int currentTimestamp = getTimestamp();
-        
-        Message msg = {id, currentTimestamp, type, content};
-        std::string messageContent = formatMessage(msg);
-        
-        comm->send(receiverId, messageContent);
-        logger.logPermisson("SEND", id, receiverId, currentTimestamp, messageContent);
+    void receivedRls(int source, int timestamp) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = (listReply.size() == totalNodes - 1) && (listRqt.top().id == id) ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        logger->log("receive", id, std::to_string(id) + " received release from " + std::to_string(source), note);
+
+        listRqt.pop();
+        cv.notify_one();
     }
 
-    void receiveMessage() {
-        std::string messageContent;
-        if (comm->getMessage(messageContent)) {
-            Message msg = parseMessage(messageContent);
-            int senderTimestamp = msg.timestamp;
-            int senderId = msg.senderId;
-
-            incrementTimestamp();
-            timeStamp.store(std::max(timeStamp.load(), senderTimestamp) + 1);
-
-            std::lock_guard<std::mutex> lock(queueMutex);
-            switch (msg.type) {
-                case REQUEST:
-                    requestQueue.push(msg);
-                    sendMessage(senderId, REPLY, "Send to " + std::to_string(msg.senderId));
-                    break;
-                    
-                case REPLY:
-                    replyReceived[senderId] = true;
-                    break;
-
-                case RELEASE:
-                    removeRequest(senderId);
-                    break;
-            }
+    void processMsg(const std::string msg) {
+        std::istringstream iss(msg);
+        int id;
+        std::string type;
+        int timestamp;
+        iss >> id >> type >> timestamp;
+        if (type == "REQUEST") {
+            receivedRqt(id, timestamp);
+            sendAgree(id, timestamp);
+        } else if (type == "OK") {
+            receivedAgree(id, timestamp);
+        } else if (type == "RELEASE") {
+            receivedRls(id, timestamp);
         }
     }
 
-    void requestCS() {
-        incrementTimestamp();
-        int currentTimestamp = getTimestamp();
-
-        {
-            std::lock_guard<std::mutex> lock(queueMutex);
-            Message request = {id, currentTimestamp, REQUEST, "Request CS"};
-            requestQueue.push(request);
-            resetReplies();
-        }
-
-        for (const auto& node : config.getNodeConfigs()) {
-            if (node.first != id) {
-                sendMessage(node.first, REQUEST, "Send to " + std::to_string(node.first));
-            }
-        }
-    }
-
-    bool canEnterCS() {
-        std::lock_guard<std::mutex> lock(queueMutex);
-        
-        return std::all_of(replyReceived.begin(), replyReceived.end(), 
-                [](const std::pair<int, bool>& entry) { return entry.second; }) &&
-                !requestQueue.empty() && requestQueue.top().senderId == id;
-    }
-
-    void releaseCS() {
-        {
-            std::lock_guard<std::mutex> lock(queueMutex);
-            if (!requestQueue.empty() && requestQueue.top().senderId == id) {
-                requestQueue.pop();
-            }
-        }
-
-        for (const auto& node : config.getNodeConfigs()) {
-            if (node.first != id) {
-                sendMessage(node.first, RELEASE, "Send to " + std::to_string(node.first));
+    void receiveMsg() {
+        std::string msg;
+        while (1) {
+            msg = "";
+            if (comm->getMessage(msg)) {
+                processMsg(msg);
             }
         }
     }
-
-    void resetReplies() {
-        for (auto& entry : replyReceived) {
-            entry.second = false;
-        }
-    }
-
-    Message parseMessage(const std::string& messageContent) {
-        // example: "Id: 1, Timestamp: 5, Type: REQUEST, Content: Requesting CS"
-        int senderIdIndex = messageContent.find("Id: ");
-        int senderTimestampIndex = messageContent.find("Timestamp: ");
-        int senderTypeIndex = messageContent.find("Type: ");
-        int senderContentIndex = messageContent.find("Content: ");
-
-        int senderId = std::stoi(messageContent.substr(senderIdIndex + 4, senderTimestampIndex - (senderIdIndex + 4) - 2));
-        int senderTimestamp = std::stoi(messageContent.substr(senderTimestampIndex + 11, senderTypeIndex - (senderTimestampIndex + 11) - 2));
-        std::string tmp = messageContent.substr(senderTypeIndex + 6, senderContentIndex - (senderTypeIndex + 6) - 2); 
-        MessageType senderType = (tmp == "REQUEST") ? REQUEST : (tmp == "REPLY") ? REPLY : RELEASE;
-        std::string senderContent = messageContent.substr(senderContentIndex + 9);
-
-        Message msg = {senderId, senderTimestamp, senderType, senderContent};
-        return msg;
-    }
-
-    std::string formatMessage(const Message& msg) {
-        std::string typeStr = (msg.type == REQUEST) ? "REQUEST" : (msg.type == REPLY) ? "REPLY" : "RELEASE";
-        return "Id: " + std::to_string(msg.senderId) + ", Timestamp: " + std::to_string(msg.timestamp) + 
-               ", Type: " + typeStr + ", Content: " + msg.content;
-    }
-
-    void removeRequest(int senderId) {
-        std::priority_queue<Message, std::vector<Message>, 
-            bool(*)(const Message&, const Message&)> tempQueue(compareMessages);
-        
-        while (!requestQueue.empty()) {
-            Message msg = requestQueue.top();
-            requestQueue.pop();
-            if (msg.senderId != senderId) {
-                tempQueue.push(msg);
-            }
-        }
-        
-        requestQueue = std::move(tempQueue);
-    }
-
 };
+
 
 #endif // LAMPORT_H

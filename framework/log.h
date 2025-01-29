@@ -224,30 +224,69 @@ public:
         state: wait ...
         content: ..., null
     */
-    void log(const std::string &type, const std::string &algorithm, int source, int dest, const std::string &direction, bool permissionOrToken, const std::string &state, const std::string &content) {
+
+
+    // {
+    //     timeInit: YYYY-MM-DD HH-MM-SS, // thời gian khởi tạo
+    //     type: notice / send / receive, // loại bản tin
+    //     duration_ms: 10, // thời điểm gửi bản tin tính từ lúc khởi tạo
+    //     id: 1 // nút ghi log
+    //     content: ..., // nội dung giải thích chi tiết cho bản tin
+    //     note: { // phần dành riêng cho ui
+    //         status: ok / null // dù là loại thuật toán nào cũng chỉ cần xét xem có được vào miền găng hay không -> ví dụ: ok = tô màu nút đó, null = nút đó mất màu
+    //         init: ok // chỉ dùng 1 lần duy nhất khi khời tạo, sau này sẽ không có trường init nữa
+    //         error: 4 5 6 7 ... // phát hiện ra nút nào đó bị lỗi, -> có giá trị là có lỗi, nếu không có trường error thì tức là không phát hiện ra lỗi
+    //         source: 1, null // nút gửi
+    //         dest: 2 3 4 ..., broadcast, null // nút nhận
+    //         // direction: -> bỏ, hướng luôn là từ source tới dest
+    //         // những trường thông tin phía dưới sẽ tùy thuật toán mà có trường thông tin khác nhau nên có thuật toán có trường thông tin có key này, có thuật toán lại không có nên cái nào không có key thì bỏ qua
+    //         // mạng hình cây (ví dụ: naimi-trehel)
+    //         last: 2 // có giá trị = khởi tạo 1 mũi tên, thay đổi giá trị = thay đổi mũi tên trỏ sang nút khác, nếu last = id luôn thì bỏ mũi tên last đi
+    //         next: 2 / -1 // nếu = -1 thì không có mũi tên, có giá trị thì mũi tên hướng đến nút có giá trị đó, giá trị thay đổi thì mũi tên thay đổi
+    //         // permission-based
+    //         // agreed: 1 2 3 4 ... / null // những nút đã đồng ý
+    //     }
+    // }
+
+    void log(const std::string &type, int id, const std::string &content, json note) {
         json data;
-        data["time"] = pointTime;
+        data["timeInit"] = pointTime;
         data["duration_ms"] = getDuration();
         data["type"] = type;
-        data["algorithm"] = algorithm;
-        data["source"] = source;
-        if (dest != -1) {
-            data["dest"] = dest;
-        }
-        data["direction"] = direction;
-        if (algorithm == "permission") {
-            data["permissible"] = permissionOrToken ? "yes" : "no";
-        } else if (algorithm == "token") {
-            data["token"] = permissionOrToken ? "yes" : "no";
-        }
-        data["state"] = state;
+        data["id"] = id;
         data["content"] = content;
+        data["note"] = note;
         std::string logData = data.dump();
 
         for (auto &m : methods) {
-            m->log(source, logData);
+            m->log(id, logData);
         }
     }
+
+    // void log(const std::string &type, const std::string &algorithm, int source, int dest, const std::string &direction, bool permissionOrToken, const std::string &state, const std::string &content) {
+    //     json data;
+    //     data["time"] = pointTime;
+    //     data["duration_ms"] = getDuration();
+    //     data["type"] = type;
+    //     data["algorithm"] = algorithm;
+    //     data["source"] = source;
+    //     if (dest != -1) {
+    //         data["dest"] = dest;
+    //     }
+    //     data["direction"] = direction;
+    //     if (algorithm == "permission") {
+    //         data["permissible"] = permissionOrToken ? "yes" : "no";
+    //     } else if (algorithm == "token") {
+    //         data["token"] = permissionOrToken ? "yes" : "no";
+    //     }
+    //     data["state"] = state;
+    //     data["content"] = content;
+    //     std::string logData = data.dump();
+
+    //     for (auto &m : methods) {
+    //         m->log(source, logData);
+    //     }
+    // }
 
 
     // void log(int id, int receiver = -1, const std::string &message = "") {

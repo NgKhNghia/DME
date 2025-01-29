@@ -45,8 +45,8 @@ public:
         : Node(id, ip, port, comm) {}
 
     virtual ~PermissonBasedNode() = default;
-    virtual void requestPermission();
-    virtual void releasePermission();
+    virtual void requestPermission() = 0;
+    virtual void releasePermission() = 0;
 };
 
 #endif // NODE_H

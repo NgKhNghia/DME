@@ -71,9 +71,12 @@ public:
 
     void send(int destId, const std::string& message) {       
         if (error.simulateNetworkError()) {
-            // std::this_thread::sleep_for(std::chrono::seconds(3));
-            // logger->log(id, -1, "NETWORK_ERROR");
-            return;
+            time_t now = time(0);
+            tm *ltm = localtime(&now);
+            char buffer[20];
+            strftime(buffer, sizeof(buffer), "%d/%m/%Y %H:%M:%S", ltm);
+            std::cout << "node " << id << " died at " + std::string(buffer) << "\n";
+            exit(EXIT_FAILURE);
         }
         // else if (error.simulateMessageLoss()) {
         //     return;
@@ -105,7 +108,6 @@ public:
             close(clientSocket);
             return;
         }
-        // logger->log(id, destId, message);
         close(clientSocket);
     }
 
@@ -137,7 +139,6 @@ private:
                     {
                         std::lock_guard<std::mutex> lock(socketMutex);
                         messageQueue.emplace(std::string(buffer));
-                        // logger->log(id, id, std::string(buffer));
                     }
                     messageAvailable.notify_one();
                 }
