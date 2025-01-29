@@ -30,11 +30,11 @@ void simulateNode(int id) {
         error.simulateNetworkError();
         node.requestToken(); 
         {
-            json note;
-            note["status"] = "ok";
-            logger->log("notice", id, std::to_string(id) + " enter critical section", note);
+            // json note;
+            // note["status"] = "ok";
+            // logger->log("notice", id, std::to_string(id) + " enter critical section", note);
             std::this_thread::sleep_for(std::chrono::seconds(distrib(gen)));
-            logger->log("notice", id, std::to_string(id) + " exit critical section", note);
+            // logger->log("notice", id, std::to_string(id) + " exit critical section", note);
         }
         node.releaseToken();
     }

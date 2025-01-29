@@ -47,6 +47,7 @@ public:
 
     void requestToken() override {
         std::unique_lock<std::mutex> lock(mtx);
+        freetime = false;
 
         json note;
         note["status"] = hasToken ? "ok" : "null";
@@ -59,15 +60,32 @@ public:
 
         if (!hasToken) {
             sendRequest(id, last);
-            freetime = false;
-            cv.wait(lock, [this] { 
-                return hasToken; 
-            });
+            cv.wait(lock, [this] { return hasToken; });
+            {
+                json note;
+                note["status"] = "ok";
+                note["error"] = "null";
+                note["source"] = "null";
+                note["dest"] = "null";
+                note["last"] = last;
+                note["next"] = next;
+                logger->log("notice", id, std::to_string(id) + " enter critical section", note);
+            }     
         }
     }
 
     void releaseToken() override {
         std::unique_lock<std::mutex> lock(mtx);
+        {
+            json note;
+            note["status"] = "ok";
+            note["error"] = "null";
+            note["source"] = "null";
+            note["dest"] = "null";
+            note["last"] = last;
+            note["next"] = next;
+            logger->log("notice", id, std::to_string(id) + " exit critical section", note);
+        }    
         freetime = true;
         
         if (next != -1) {
@@ -112,7 +130,6 @@ private:
                 releaseToken();
             }
         }
-        // last = requesterId;
     }
 
     void receivedToken(int source) {

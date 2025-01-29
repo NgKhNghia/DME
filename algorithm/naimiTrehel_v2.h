@@ -3,7 +3,7 @@
 #define NAIMITREHELV2_H
 
 #include "node.h"
-#include <memory>
+// #include <memory>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
@@ -12,15 +12,20 @@ class NaimiTrehelV2 : public TokenBasedNode {
 private:   
     int last;                           // node cuoi cung se truy cap CS
     int next;                           // node tiep theo se truy cap CS
-    bool nextUpdate;                    // kiem tra xem co node nao moi request hay khong
-    bool hasRequest;                    // da gui yeu cau hay chua
-    bool intoCS;                        // co the vao hoac dang trong CS 
-    bool hasRespond;                    // da nhan duoc phan hoi sau khi gui CONSULT
-    bool hasExsit;                      // da nhan duoc phan hoi sau khi gui EXSIT
-    bool stopExtension;                 // dung gui CONSULT...
-    std::map<int, bool> electedId;      // luu tru nhung node yeu cau tai tao token
+    int totalNodes;
+    bool freetime;
+    // bool nextUpdate;                    // kiem tra xem co node nao moi request hay khong
+    // bool hasRequest;                    // da gui yeu cau hay chua
+    bool hasAckConsult;                    // da nhan duoc phan hoi sau khi gui CONSULT
+    bool hasAckFailure;                      // da nhan duoc phan hoi sau khi gui ACK_FAILURE
+    bool voted;                 // dung gui CONSULT...
+    std::map<int, bool> listCandidate;
+
     std::mutex mtx;
+    std::mutex mtxMsg;
+    std::mutex mtxErr;
     std::condition_variable cv;
+
     std::thread receiveThread;
 
     const std::chrono::seconds T_wait{5};
@@ -28,16 +33,16 @@ private:
 
 public:
     NaimiTrehelV2(int id, const std::string& ip, int port, std::shared_ptr<Comm> comm) 
-        : TokenBasedNode(id, ip, port, comm), last(1), next(-1), intoCS(false), nextUpdate(false), stopExtension(false) {
+        : TokenBasedNode(id, ip, port, comm), last(1), next(-1), freetime(true) {
         hasToken = (id == 1);
-        logger->log("notice", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
+        totalNodes = config.getTotalNodes();
+        // logger->log("notice", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
     }   
 
     ~NaimiTrehelV2() {
         if (receiveThread.joinable()) {
             receiveThread.join();
         }
-        logger->log("notice", "token", id, -1, "", hasToken, "destroy", "node " + std::to_string(id) + " destroy");
     }
 
     void initialize() override {
@@ -45,249 +50,400 @@ public:
     }
 
     void requestToken() override {
-        {
-            std::unique_lock<std::mutex> lock(mtx);
-            hasRequest = false;
-        }
-        while (!hasToken) {
-            {
-                std::unique_lock<std::mutex> lock(mtx);
-                if (!hasRequest) {
-                    sendRequest(last, id);
-                    last = id;
-                    hasRequest = true;
-                }
-                if (cv.wait_for(lock, std::chrono::seconds(T_wait), [this]() { return hasToken || stopExtension; })){
-                    if (hasToken) break;
-                    else if (stopExtension) continue;
+        std::unique_lock<std::mutex> lock(mtx);
+        freetime = false;
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+
+        sendRequest(id, last);
+        while (true) {
+            if (hasToken) {
+                break;
+            } else if (voted) {
+                sendRequest(id, last);
+            } else {
+                if (!cv.wait_for(lock, std::chrono::seconds(T_wait), [this]() { return hasToken; })) {
+                    json note;
+                    note["status"] = "null";
+                    note["error"] = "suspect";
+                    note["source"] = "null";
+                    note["dest"] = "null";
+                    note["last"] = last;
+                    note["next"] = next;
+                    logger->log("notice", id, std::to_string(id) + " suspect that a failure occurred", note);
+
+                    sendConsult();
                 }
             }
-            stopExtension = false; 
-            sendConsult();
-            if (hasToken) break;
         }
-
-        std::unique_lock<std::mutex> lock(mtx);
-        intoCS = true;
     }
 
     void releaseToken() override {
-        std::unique_lock<std::mutex> lock(mtx);
-        intoCS = false;
-        hasRequest = false;
-        if (nextUpdate) {
+        std::unique_lock<std::mutex> lock(mtx); 
+        freetime = false;
+
+        if (next != -1) {
             sendToken(next);
-            hasToken = false;
-            nextUpdate = false;
+            next = -1;
+
+            json note;
+            note["status"] = "null";
+            note["error"] = "null";
+            note["source"] = "null";
+            note["dest"] = "null";
+            note["last"] = last;
+            note["next"] = "null";
+            logger->log("notice", id, std::to_string(id) + " release", note);
         }
     }
 
 private:
-    void processMessage(const std::string& message) {
-        std::istringstream iss(message);
-        std::string msgType;
-        int senderId;
-        iss >> msgType >> senderId;
+    void receiveToken(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        hasToken = true;
 
-        if (msgType == "REQUEST") {
-            receiveRequest(senderId);
-        } else if (msgType == "TOKEN") {
-            receiveToken(senderId);
-        } else if (msgType == "CONSULT") {
-            receiveConsult(senderId);
-        } else if (msgType == "RESPOND") { // respond for consult -> nut lien truoc van ton tai
-            receiveRespond(senderId);
-        } else if (msgType == "FAILURE") { 
-            receiveFailure(senderId);
-        } else if (msgType == "EXSIT") { // respond for failure -> token van ton tai
-            receiveExsit(senderId);
-        } else if (msgType == "ELECTION") {
-            receiveElection(senderId);
-        } else if (msgType == "ELECTED") {
-            receiveElected(senderId);
-        }
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+
+        cv.notify_one();
     }
 
-    void sendToken(int destId) {
-        std::string message = "TOKEN " + std::to_string(id);
-        comm->send(destId, message);
-        logger->log("send", "token", id, next, std::to_string(id) + " to " + std::to_string(next), hasToken, "", std::to_string(id) + " sent token to " + std::to_string(next));
-    }
+    void receiveRequest(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
 
-    void sendRequest(int destId, int requesterId) {
-        std::string message = "REQUEST " + std::to_string(requesterId);
-        comm->send(destId, message);
-        if (id == requesterId) {
-            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId));
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = source;
+        note["next"] = (next != -1) ? next : (freetime) ? -1 : source;
+        logger->log("receive", id, std::to_string(id) + " received request from " + std::to_string(source), note);
+
+        if (id != last) {
+            sendRequest(source, last);
         } else {
-            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId) + " for " + std::to_string(requesterId));
+            next = source;
+            last = source;
+            if (freetime) {
+                releaseToken();
+            }
         }
     }
 
-    // kiem tra node lien truoc con song hay khong
+    void sendToken(int dest) {
+        std::string message = std::to_string(id) + " TOKEN";
+
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent token to " + std::to_string(dest), note);
+        
+        comm->send(dest, message);
+    }
+
+    void sendRequest(int source, int dest) {
+        std::string message = std::to_string(source) + " REQUEST";
+        last = source;
+
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+
+        if (id == source) {
+            logger->log("send", id, std::to_string(id) + " sent request to " + std::to_string(dest), note);
+        } else {
+            logger->log("send", id, std::to_string(id) + " sent request to " + std::to_string(dest) + " for " + std::to_string(source), note);
+        }
+
+        comm->send(dest, message);
+    }
+
     void sendConsult() { 
         {
-            std::unique_lock<std::mutex> lock(mtx);
-            hasRespond = false;
-            for (int i = 1; i <= config.getTotalNodes(); i++) {
+            std::unique_lock<std::mutex> lock(mtxErr);
+            hasAckConsult = false;
+
+            json note;
+            note["status"] = "null";
+            note["error"] = "null";
+            note["source"] = id;
+            note["dest"] = "broadcast";
+            note["last"] = last;
+            note["next"] = next;
+            logger->log("send", id, std::to_string(id) + " broadcast consult message", note);
+
+            for (int i = 1; i <= totalNodes; i++) {
                 if (i != id) {
-                    comm->send(i, "CONSULT " + std::to_string(id));
+                    comm->send(i, std::to_string(id) + " CONSULT");
                 }
             }
-            // logger->log(id, -1, std::to_string(id) + " send broadcast CONSULT");
-            logger->log("send", "token", id, -1, "broadcast", hasToken, "sent", std::to_string(id) + " send broadcast CONSULT");
 
-            if (cv.wait_for(lock, T_elec, [this]() { return hasRespond || hasToken || stopExtension; })) {
+            if (cv.wait_for(lock, T_elec, [this]() { return hasAckConsult || hasToken || voted; })) {
                 return; 
             }
         } 
         sendFailure();
     }
 
-    // kiem tra con token hay khong
+    void sendAckConsult(int dest) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent ack consult message to " + std::to_string(dest), note);
+
+        comm->send(dest, std::to_string(id) + " ACK_CONSULT");
+    }
+
     void sendFailure() {
         {
-            std::unique_lock<std::mutex> lock(mtx);
-            hasExsit = false;
-            for (int i = 1; i <= config.getTotalNodes(); i++) {
+            std::unique_lock<std::mutex> lock(mtxErr);
+            hasAckFailure = false;
+
+            json note;
+            note["status"] = "null";
+            note["error"] = "null";
+            note["source"] = id;
+            note["dest"] = "broadcast";
+            note["last"] = last;
+            note["next"] = next;
+            logger->log("send", id, std::to_string(id) + " broadcast failure message", note);
+
+            for (int i = 1; i <= totalNodes; i++) {
                 if (i != id) {
-                    comm->send(i, "FAILURE " + std::to_string(id));
+                    comm->send(i, std::to_string(id) + " FAILURE");
                 }
             }
-            logger->log("send", "token", id, -1, "broadcast", hasToken, "sent", std::to_string(id) + " send broadcast FAILURE");
 
-
-            if (cv.wait_for(lock, T_elec, [this]() { return hasExsit || hasToken || stopExtension; })) {
+            if (cv.wait_for(lock, T_elec, [this]() { return hasAckFailure || hasToken || voted; })) {
                 return; 
             }
         } 
         sendElection();
     }
 
-    // phat ban tin ung cu token
+    void sendAckFailure(int dest) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent ack failure message to " + std::to_string(dest), note);
+
+        comm->send(dest, std::to_string(id) + " ACK_FAILURE");       
+    }
+
     void sendElection() {
         {
-            std::unique_lock<std::mutex> lock(mtx);
-            electedId[id] = true;
-            for (int i = 1; i <= config.getTotalNodes(); i++) {
+            std::unique_lock<std::mutex> lock(mtxErr);
+            listCandidate[id] = true;
+
+            json note;
+            note["status"] = "null";
+            note["error"] = "null";
+            note["source"] = id;
+            note["dest"] = "broadcast";
+            note["last"] = last;
+            note["next"] = next;
+            logger->log("send", id, std::to_string(id) + " broadcast election message", note);
+
+            for (int i = 1; i <= totalNodes; i++) {
                 if (i != id) {
-                    comm->send(i, "ELECTION " + std::to_string(id));
+                    comm->send(i, std::to_string(id) + " ELECTION");
                 }
             }
-            logger->log("send", "token", id, -1, "broadcast", hasToken, "sent", std::to_string(id) + " send broadcast ELECTION");
             
-            if (cv.wait_for(lock, T_elec, [this]() { return hasToken || stopExtension; })) {
+            if (cv.wait_for(lock, T_elec, [this]() { return hasToken || voted; })) {
                 return;
             }
         }
-        regenerateToken();
+        sendElected();
     }
 
-    void regenerateToken() {
-        int minElecterId = id;
-        for (const auto &it : electedId) {
-            if (it.first < minElecterId) minElecterId = it.first;
+    void sendElected() {
+        std::unique_lock<std::mutex>(mtxErr);
+        int minCandidate = id;
+        for (const auto &it : listCandidate) {
+            if (it.first < minCandidate) minCandidate = it.first;
         }
-        if (id == minElecterId) {
-            {
-                std::unique_lock<std::mutex> lock(mtx);
-                hasToken = true;
-                nextUpdate = false;
-                last = id;
-                next = -1;
-                electedId.clear();
-                cv.notify_one();
-                logger->log("send", "token", id, -1, "", hasToken, "broadcast", std::to_string(id) + " regenerated token");
+        if (id == minCandidate) {
+            json note;
+            note["status"] = "ok";
+            note["error"] = "null";
+            note["source"] = "null";
+            note["dest"] = "null";
+            note["last"] = id;
+            note["next"] = -1;
 
-            }
+            hasToken = true;
+            last = id;
+            next = -1;
+            listCandidate.clear();
 
-            for (int i = 1; i <= config.getTotalNodes(); i++) {
+            note["source"] = id;
+            note["dest"] = "broadcast";
+            logger->log("send", id, std::to_string(id) + " broadcast elected message", note);
+            for (int i = 1; i <= totalNodes; i++) {
                 if (i != id) {
-                    comm->send(i, "ELECTED " + std::to_string(id));
+                    comm->send(i, std::to_string(id) + " ELECTED");
                 }
             }
-            logger->log("send", "token", id, -1, "", hasToken, "broadcast", std::to_string(id) + " broadcast ELECTED");
         }
     }
 
-    void receiveToken(int senderID) {
-        std::unique_lock<std::mutex> lock(mtx);
-        hasToken = true;
-        logger->log("receive", "token", senderID, id, std::to_string(senderID) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received token from " + std::to_string(senderID));
+    void receiveConsult(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received consult message from " + std::to_string(source), note);
+
+        if (next == source) {
+            sendAckConsult(source);
+        }
+    }
+
+    void receiveAckConsult(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        hasAckConsult = true;
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received ack consult message from " + std::to_string(source), note);
+
         cv.notify_one();
     }
 
-    void receiveRequest(int requesterId) {
-        std::unique_lock<std::mutex> lock(mtx);
-        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received request from " + std::to_string(requesterId));
-        if (id != last) {
-            sendRequest(last, requesterId);
-        } else if (hasToken && !intoCS) {
-            sendToken(requesterId);
-            hasToken = false;
-        } else {
-            next = requesterId;
-            nextUpdate = true;
-        }
-        last = requesterId;
-    }
+    void receiveFailure(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
 
-    void receiveConsult(int senderId) {
-        if (next == senderId) {
-            logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received RESPONE from " + std::to_string(senderId));
-            comm->send(senderId, "RESPOND " + std::to_string(id));
-            logger->log("send", "token", id, senderId, std::to_string(id) + " to " + std::to_string(senderId), hasToken, "", std::to_string(id) + " sent RESPONE to " + std::to_string(senderId));
-        }
-    }
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received failure message from " + std::to_string(source), note);
 
-    void receiveRespond(int senderId) {
-        std::unique_lock<std::mutex> lock(mtx);
-        hasRespond = true;
-        logger->log("send", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received RESPONE from " + std::to_string(senderId));
-        cv.notify_one();
-    }
-
-    void receiveFailure(int senderId) {
         if (hasToken) {
-            logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received EXSIT from " + std::to_string(senderId));
-            comm->send(senderId, "EXSIT " + std::to_string(id));
-            logger->log("send", "token", id, senderId, std::to_string(id) + " to " + std::to_string(senderId), hasToken, "", std::to_string(id) + " sent EXSIT to " + std::to_string(senderId));
+            sendAckFailure(source);
         }
     }
 
-    void receiveExsit(int senderId) {
-        std::unique_lock<std::mutex> lock(mtx);
-        hasExsit = true;
-        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received ESXIT from " + std::to_string(senderId));
+    void receiveAckFailure(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        hasAckFailure = true;
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received ack failure message from " + std::to_string(source), note);
+
         cv.notify_one();
     }
 
-    void receiveElection(int senderId) {
-        std::unique_lock<std::mutex> lock(mtx);
-        electedId[senderId] = true;
-        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received ELECTION from " + std::to_string(senderId));
+    void receiveElection(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received eletion message from " + std::to_string(source), note);     
+
+        listCandidate[source] = true;
     }
 
-    void receiveElected(int senderId) {
-        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "", std::to_string(id) + " received ELECTED from " + std::to_string(senderId));
-        {
-            std::unique_lock<std::mutex> lock(mtx);
-            next = -1;
-            last = senderId;
-            hasRequest = false;
-            hasToken = false;
-            hasRespond = false;
-            hasExsit = false;
-            stopExtension = true;
-            electedId.clear();
-            cv.notify_all();
+    void receiveElected(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received eleted message from " + std::to_string(source), note);        
+
+        next = -1;
+        last = source;
+        hasToken = false;
+        hasAckConsult = false;
+        hasAckFailure = false;
+        voted = true;
+        listCandidate.clear();
+        cv.notify_one();
+    }
+
+    void processMessage(const std::string& message) {
+        std::istringstream iss(message);
+        std::string msgType;
+        int source;
+        iss >> source >> msgType;
+
+        if (msgType == "REQUEST") {
+            receiveRequest(source);
+        } else if (msgType == "TOKEN") {
+            receiveToken(source);
+        } else if (msgType == "CONSULT") {
+            receiveConsult(source);
+        } else if (msgType == "ACK_CONSULT") { 
+            receiveAckConsult(source);
+        } else if (msgType == "FAILURE") { 
+            receiveFailure(source);
+        } else if (msgType == "ACK_FAILURE") {
+            receiveAckFailure(source);
+        } else if (msgType == "ELECTION") {
+            receiveElection(source);
+        } else if (msgType == "ELECTED") {
+            receiveElected(source);
         }
     }
-
-
-
-
-    
 
     void receiveMsg() {
         while (true) {
