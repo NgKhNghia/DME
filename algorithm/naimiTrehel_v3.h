@@ -11,6 +11,7 @@
 
 class NaimiTrehelV3 : public TokenBasedNode {
 private:   
+    int totalNodes;
     int k;               // tham so bieu thi so loi ma thuat toan co the khoi phuc theo co che M1
     int last;            // id cua node cuoi cung yeu cau CS tai thoi diem yeu cau token
     int next;            // id cua node tiep theo nhan token
@@ -19,27 +20,25 @@ private:
     int cnt;             // so lan truy cap CS
     int otherCnt;        // so lan truy cap CS cua nut khac
     int otherId;         // id nut khac khi dang bau cu
-    int predecessorAlive;// nut tien nhiem con song, dung trong co che M1
 
-    std::vector<int> predecessors;
-    // std::vector<int> aliveM1;
+    std::vector<int> listPredecesers;
     std::map<int, int> aliveM2;     // id, position
     std::map<int, std::pair<int, int>> aliveM3; // id, position, next
 
-    bool inCS;           // co the truy cap hoac dang truy cap CS       -> khong can
-    bool nextUpdate;     // kiem tra xem co node nao moi request hay khong
-    bool hasRequest;     // da gui yeu cau
+    bool freetime;
     bool hasCommit;      // da duoc ket noi vao queue
     bool hasAlive;       // ton tai mot trong cac nut tien nhiem con song 
     bool hasPong;        // nhan duoc phan hoi con song tu nut tien nhiem
-    bool hasElection;    // phat hien ra loi theo co che M3 va dang trong qua trinh bau cu
-    bool hasFailure;     // phat hien ra loi
+    bool electionDetected;    // phat hien ra loi theo co che M3 va dang trong qua trinh bau cu
+    bool failureDetected;     // phat hien ra loi
 
     std::mutex mtx;
-    std::mutex mutexCheckFailure;
-    // std::mutex mutexPing;
+    std::mutex mtxMsg;
+    std::mutex mtxPingPong;
+
     std::condition_variable cv;
-    std::thread listenerThread;
+
+    std::thread receiveThread;
     std::thread pingPong;
 
     const std::chrono::milliseconds T_msg{500};
@@ -47,47 +46,59 @@ private:
 
 public:
     NaimiTrehelV3(int id, const std::string& ip, int port, int k, std::shared_ptr<Comm> comm) 
-        : TokenBasedNode(id, ip, port, comm), k(k), last(1), next(-1), predecessor(-1), cnt(0), inCS(false), nextUpdate(false) {
+        : TokenBasedNode(id, ip, port, comm), k(k), last(1), next(-1), predecessor(-1), cnt(0), freetime(true) {
+        totalNodes = config.getTotalNodes();
         hasToken = (id == 1);
         position = (id == 1 ? 0 : -1);
-        hasElection = false;
         for (int i = 0; i < k; i++) {
-            predecessors.push_back(-1);
+            listPredecesers.push_back(-1);
         }
-        logger->log("notice", "token", id, -1, "", hasToken, "init", "node " + std::to_string(id) + " init");
+
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["init"] = "ok";
+        // note["error"] = "null";
+        // note["source"] = "null";
+        // note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " init", note);
+
+        initialize();
     }   
 
     ~NaimiTrehelV3() {
-        if (listenerThread.joinable()) {
-            listenerThread.join();
+        if (receiveThread.joinable()) {
+            receiveThread.join();
         }
         if (pingPong.joinable()) {
             pingPong.join();
         }
-        logger->log("notice", "token", id, -1, "", hasToken, "destroy", "node " + std::to_string(id) + " destroy");
-    }
-
-    void initialize() override {
-        listenerThread = std::thread(&NaimiTrehelV3::listenForMessages, this);
-        pingPong = std::thread(&NaimiTrehelV3::sendPing, this);
     }
 
     void requestToken() override {
         std::unique_lock<std::mutex> lock(mtx);
-        if (hasRequest || hasToken) {
-            return;
+        freetime = false;
+        
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " request token", note);
+        
+        if (!hasToken) {
+            sendRequest(id, last);
+            if (!cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {
+                lock.unlock();
+                mechanism3();
+                lock.lock();
+            }
+            cv.wait(lock, [this]() { return hasToken; });
         }
-        hasCommit = false;
-        sendRequest(last, id);
-        // logger->log("send", "token", id, last, std::to_string(id) + " to  " + std::to_string(last), hasToken ? "yes" : "no", "waiting", std::to_string(id) + " send request to " + std::to_string(last));
-        last = id;
-        if (!cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {
-            lock.unlock();
-            mechanism3();
-            lock.lock();
-        }
-
-        cv.wait(lock, [this]() { return hasToken; });
+        
     }   
 
     void releaseToken() override {
@@ -95,102 +106,159 @@ public:
         cnt++;
         predecessor = -1;
         position = -1;
+        freetime = true;
+        otherId = -1;
+        otherCnt = -1;
 
-        inCS = false;
-        hasRequest = false;
-        hasCommit = false;
-        hasAlive = false;
-        hasElection = false;
-        hasFailure = false;
-
-        if (nextUpdate) {
+        if (next != -1) {
             sendToken(next);
-            hasToken = false;
-            nextUpdate = false;
+            next = -1;
+
+            json note;
+            note["status"] = "null";
+            note["error"] = "null";
+            note["source"] = "null";
+            note["dest"] = "null";
+            note["last"] = last;
+            note["next"] = -1;
+            logger->log("notice", id, std::to_string(id) + " release", note);
         }
-        logger->log("notice", "token", id, -1, "", hasToken, "", std::to_string(id) + " released token");
     }
 
 private:
-    void sendCommit(int requesterId) {
-        // std::unique_lock<std::mutex> lock(mtx);
-        std::string msg;
-        if (position != -1) {
-            msg = "COMMIT " + std::to_string(id);
-            for (int i = 1; i < k; i++) {
-                // if (predecessors[i] != -1) {
-                    msg += " " + std::to_string(predecessors[i]);
-                // } else {
-                    // msg += " -1";
-                // }
-            }
-            msg += " " + std::to_string(id) + " " + std::to_string(position + 1);
+    void initialize() override {
+        receiveThread = std::thread(&NaimiTrehelV3::receiveMsg, this);
+        pingPong = std::thread(&NaimiTrehelV3::sendPing, this);
+    }
+
+    void sendRequest(int source, int dest) {
+        std::string message = std::to_string(source) + " REQUEST";
+        last = source;
+
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        
+        if (id == source) {
+            logger->log("send", id, std::to_string(id) + " sent request to " + std::to_string(dest), note);
         } else {
-            msg = "OK " + std::to_string(id);
+            logger->log("send", id, std::to_string(id) + " sent request to " + std::to_string(dest) + " for " + std::to_string(source), note);
         }
-        // std::cout << msg << "\n";
-        comm->send(requesterId, msg);
-        logger->log("send", "token", id, requesterId, std::to_string(id) + " to " + std::to_string(requesterId), hasToken, "sent", std::to_string(id) + " sent commit message to " + std::to_string(requesterId));
+        
+        comm->send(dest, message);
     }
 
-    void receivedCommit(int senderId, std::vector<int> tmpPredecessors, int tmpPosition) {
-        // std::unique_lock<std::mutex> lock(mtx);
-        // logger->log(id, id, std::to_string(id) + " received commit message from " + std::to_string(senderId));
-        predecessor = senderId;
-        predecessors = tmpPredecessors;
-        position = tmpPosition;
-        hasCommit = true;
-        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received commit message from " + std::to_string(senderId));
-        cv.notify_one();
-    }
-
-    void receivedCommitOk(int senderId) {
-        // std::unique_lock<std::mutex> lock(mtx);
-        // logger->log(id, id, std::to_string(id) + " received commit message from " + std::to_string(senderId));
-        predecessor = senderId;
-        hasCommit = true;
-        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received commit message from " + std::to_string(senderId));
-        cv.notify_one();
-    }
-
-    void sendPing() {
-        std::unique_lock<std::mutex> lock(mutexCheckFailure);
-        while (true) {
-            if (predecessor == -1) {
-                continue;
+    void receivedRequest(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = source;
+        note["next"] = (next != -1) ? next : (freetime) ? -1 : source;
+        logger->log("receive", id, std::to_string(id) + " received request from " + std::to_string(source), note);
+        
+        if (id != last) {
+            sendRequest(source, last);
+        } else {
+            sendCommit(source);
+            if (freetime) {
+                releaseToken();
             }
-            hasPong = false;
-            comm->send(predecessor, "ping");
-            if (!cv.wait_for(lock, 2 * T_msg, [this]() { return hasPong; })) {
-                lock.unlock();
-                mechanism1();
-                lock.lock();
-            }
-            std::this_thread::sleep_for(T_ping);
         }
     }
 
-    void sendPong() {
-        comm->send(next, "pong " + std::to_string(id));
+    void sendCommit(int dest) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = dest;
+        note["next"] = dest;
+        logger->log("send", id, std::to_string(id) + " sent commit to " + std::to_string(dest), note);
+        
+        next = dest;
+        last = dest;
+        std::string msg = std::to_string(id) + " COMMIT ";
+        for (int i = 1; i < k; i++) {
+            msg += " " + std::to_string(listPredecesers[i]);
+        }
+        msg += " " + std::to_string(id) + " " + std::to_string(position + 1);
+        comm->send(dest, msg);
     }
 
-    void receivedPong() {
-        hasPong = true;
+    void receivedCommit(int source, std::vector<int> predes, int pos) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received commit message from " + std::to_string(source), note);
+
+        predecessor = source;
+        this->listPredecesers = predes;
+        position = pos;
+        hasCommit = true;
+        cv.notify_one();
+    }
+
+    void sendToken(int destId) {
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = next;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent token to " + std::to_string(next), note);
+
+        hasToken = false;
+        std::string message = std::to_string(id) + " TOKEN";
+        comm->send(destId, message);
+    }
+
+    void receivedToken() {
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = predecessor;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received token from " + std::to_string(predecessor), note);
+
+        hasToken = true;
         cv.notify_one();
     }
 
     void mechanism1() { 
-        std::unique_lock<std::mutex> lock(mutexCheckFailure);
-        logger->log("error", "token", id, -1, "", hasToken, "", std::to_string(id) + " detected " + std::to_string(predecessor) + " failure");
+        std::unique_lock<std::mutex> lock(mtxPingPong);
+        json note;
+        note["status"] = "null";
+        note["error"] = predecessor;
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " detected " + std::to_string(predecessor) + " failure", note);
+
         predecessor = -1;
         for (int i = k - 2; i >= 0; i--) {
-            if (predecessors[i] == -1) {
+            if (listPredecesers[i] == -1) {
                 continue;
             }
-            hasAlive = false;
-            comm->send(predecessors[i], "ARE_YOU_ALIVE " + std::to_string(id));
+            sendAreYouAlive(listPredecesers[i]);
             if (cv.wait_for(lock, 2 * T_msg, [this]() { return hasAlive; })) {
-                sendRequestFailure(predecessorAlive, id);
+                sendRequestM1(listPredecesers[i]);
                 if (cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {
                     return;
                 }
@@ -202,24 +270,119 @@ private:
         }
     }
 
+    void sendAreYouAlive(int dest) {
+        comm->send(dest, std::to_string(id) + " ARE_YOU_ALIVE");
+    }
+
+    void receiveAreYouAlive(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received are you alive from " + std::to_string(source), note);
+        
+        sendIAmAlive(source);
+    }
+
+    void sendIAmAlive(int dest) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent i am alive to " + std::to_string(dest), note);
+
+        comm->send(dest, std::to_string(id) + " I_AM_ALIVE");
+    }
+    
+    void receiveIAmAlive(int source) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received i am alive from " + std::to_string(source), note);
+        
+        hasAlive = true;
+        cv.notify_one();
+    }
+
+    void sendRequestM1(int dest) { 
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent request m1 to " + std::to_string(dest), note);
+
+        std::string message = std::to_string(id) + " REQUEST_M1";
+        comm->send(dest, message);
+    }
+
+    void receiveRequestM1(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = source;
+        logger->log("receive", id, std::to_string(id) + " received request m1 from " + std::to_string(source), note);
+
+        sendCommitM1(source);
+    }
+
+    void sendCommitM1(int dest) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = dest;
+        logger->log("send", id, std::to_string(id) + " sent commit m1 to " + std::to_string(dest), note);
+
+        next = dest;
+        std::string msg = std::to_string(id) + " COMMIT ";
+        for (int i = 1; i < k; i++) {
+            msg += " " + std::to_string(listPredecesers[i]);
+        }
+        msg += " " + std::to_string(id) + " " + std::to_string(position + 1);
+        comm->send(dest, msg);
+    }
+
     void mechanism2() {
-        std::unique_lock<std::mutex> lock(mutexCheckFailure);
-        std::string tmp = "";
+        std::unique_lock<std::mutex> lock(mtxPingPong);
+        std::string listFailure = "";
         for (int i = k - 1; i >= 0; i--) {
             if (i != 0) {
-                tmp += std::to_string(predecessors[i]) + " ";
+                listFailure += std::to_string(listPredecesers[i]) + " ";
             } else {
-                tmp += std::to_string(predecessors[i]);
+                listFailure += std::to_string(listPredecesers[i]);
             }
         }
-        logger->log("error", "token", id, -1, "", hasToken, "", std::to_string(id) + " detected " + tmp + " failure");
+        json note;
+        note["status"] = "null";
+        note["error"] = listFailure;
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " detected " + listFailure + " failure", note);
+
         aliveM2.clear();
-        for (int i = 1; i <= config.getTotalNodes(); i++) {
-            if (i == id) {
-                continue;
-            }
-            comm->send(i, "SEARCH_PREV " + std::to_string(id) + " " + std::to_string(position));
-        }
+        sendSearchPrev();
         std::this_thread::sleep_for(2 * T_msg);
         if (!aliveM2.empty()) {
             while (!aliveM2.empty()) {
@@ -227,7 +390,7 @@ private:
                     return a.second < b.second;
                 });
                 aliveM2.erase(max.first);
-                sendRequestFailure(max.first, id);
+                sendRequestM1(max.first);
                 if (cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {     // tu bia ra
                     return;
                 }
@@ -237,248 +400,369 @@ private:
         }
     }
 
+    void sendSearchPrev() {
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = "broadcast";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " broadcast search prev", note);
+
+        for (int i = 1; i <= totalNodes; i++) {
+            if (i != id) {
+                comm->send(i, std::to_string(id) + " SEARCH_PREV " +  std::to_string(position));
+            }
+        }
+    }
+
+    void receiveSearchPrev(int source, int pos) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received search prev from " + std::to_string(source), note);
+
+        if (position < pos) {
+            sendAckSearchPrev(source);
+        }
+    }
+
+    void sendAckSearchPrev(int dest) {
+        comm->send(dest, std::to_string(id) + " ACK_SEARCH_PREV" + std::to_string(position));
+    }
+
+    void receiveAckSearchPrev(int source, int pos) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received ack search prev from " + std::to_string(source), note);
+
+        aliveM2.insert(std::pair<int, int>{source, pos});
+    }
+
     void mechanism3() { 
         std::unique_lock<std::mutex> lock(mtx);
-        logger->log("error", "token", id, -1, "", hasToken, "", std::to_string(id) + " sent request but did not receive commit");
-        hasFailure = true;
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " sent request message but didn't receive commit", note);
+
+        bool stop = false;
+        failureDetected = true;
         aliveM3.clear();
-        for (int i = 1; i <= config.getTotalNodes(); i++) {
-            if (i == id) {
-                continue;
+        sendSearchQueue();
+        // M3b
+        std::thread t([&, this]() { 
+            int time = 0;
+            while (!stop && (std::chrono::milliseconds)time < T_msg) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                time += 10;
             }
-            comm->send(i, "SEARCH_QUEUE " + std::to_string(id) + " " + std::to_string(cnt));
-        }
-        std::this_thread::sleep_for(2 * T_msg);
-        if (aliveM3.empty()) {
-            if (hasElection) {     // M3b
+            stop = true;
+        });
+
+        while (!stop) {
+            if (electionDetected) {     
                 if (cnt > otherCnt || (cnt == otherCnt) && (id > otherId)) {
+                    stop = true;
+                    t.join();
                     sendRequest(otherId, id);
                     return;
+                } else {
+                    electionDetected = false;
                 }
             }
-        } else {
-            // M3a
-            while (!aliveM3.empty()) {      // tu bia ra
-                auto maxElement = *std::max_element(aliveM3.begin(), aliveM3.end(), [this](const auto &a, const auto &b) {
-                    return a.second.first < b.second.first;
-                });
-                aliveM3.erase(maxElement.first);
-                if (maxElement.second.second == -1) {
-                    sendRequestDirectly(maxElement.first);  
-                    if (cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {
-                        return;
-                    }
+        }
+        if (t.joinable()) {
+            t.join();
+        }
+        // M3a
+        while (!aliveM3.empty()) {     
+            auto maxElement = *std::max_element(aliveM3.begin(), aliveM3.end(), [this](const auto &a, const auto &b) {
+                return a.second.first < b.second.first;
+            });
+            aliveM3.erase(maxElement.first);
+            if (maxElement.second.second == -1) {
+                sendRequest(id, maxElement.first); 
+                if (cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {
+                    return;
                 } else {
-                    sendConnection(maxElement.first);       
-                    if (cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {
-                        return;
-                    }
-                } 
-            }
-        } 
+                    logger->log("notice", id, std::to_string(id) + " detected " + std::to_string(maxElement.first) + " failure", note);
+                }
+            } else {
+                logger->log("notice", id, std::to_string(id) + " detected " + std::to_string(maxElement.second.second) + " failure", note);
+
+                sendConnection(maxElement.first);       
+                if (cv.wait_for(lock, 2 * T_msg, [this]() { return hasCommit; })) {
+                    return;
+                } else {
+                    logger->log("notice", id, std::to_string(id) + " detected " + std::to_string(maxElement.first) + " failure", note);
+                }
+            } 
+        }
         if (aliveM3.empty()) {
             regeneratedToken();
         }
     }
 
-    void sendRequestDirectly(int dest) {
-        comm->send(dest, "DIRECTLY " + std::to_string(id));
-        logger->log("send", "token", id, dest, std::to_string(id) + " to " + std::to_string(dest), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(dest));
+    void sendSearchQueue() {
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = "broadcast";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " broadcast search queue", note);
+
+        for (int i = 1; i <= totalNodes; i++) {
+            if (i != id) {
+                comm->send(i, std::to_string(id) + " SEARCH_QUEUE " + std::to_string(cnt));
+            }
+        }
     }
 
-    void receivedRequestDirectly(int source) {
-        next = source;
-        last = source;
-        logger->log("receive", "token", source, id, std::to_string(source) + " to " + std::to_string(id), hasToken, "recieved", std::to_string(id) + " received request from " + std::to_string(source));
-        sendCommit(source);
+    void receiveSearchQueue(int source) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received search queue from " + std::to_string(source), note);
+
+        if (!failureDetected) {
+            if (position != -1) {
+                sendAckSearchQueue(source);
+            }
+        } else {
+            electionDetected = true;
+        }
     }
+
+    void sendAckSearchQueue(int dest) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent ack search queue to " + std::to_string(dest), note);
+
+        comm->send(dest, std::to_string(id) + " ACK_SEARCH_QUEUE " + std::to_string(position) + " " + std::to_string(next));
+    }
+
+    void receivedAckSearchQueue(int source, int pos, int next) {
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = this->next;
+        logger->log("received", id, std::to_string(id) + " received ack search queue from " + std::to_string(source), note);
+
+        aliveM3.insert(std::pair(source, std::pair(pos, next)));
+    }   
 
     void sendConnection(int dest) {
-        comm->send(dest, "CONNECTION " + std::to_string(id));
-        logger->log("send", "token", id, dest, std::to_string(id) + " to " + std::to_string(dest), hasToken, "sent", std::to_string(id) + " sent connection to " + std::to_string(dest));
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " sent connection to " + std::to_string(dest), note);
+
+        comm->send(dest, std::to_string(id) + " CONNECTION");
     }
 
     void receivedConnection(int source) {
-        next = source;
-        last = source;
-        logger->log("receive", "token", source, id, std::to_string(source) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received connection from " + std::to_string(source));
-        sendCommit(source);
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = source;
+        logger->log("receive", id, std::to_string(id) + " received connection from " + std::to_string(source), note);
+
+        sendAckConnection(source);
     }
 
-    void receivedAckSearchQueue(int requesterId, int tmpPost, int tmpNext) {
-        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received ack search queue from " + std::to_string(requesterId));
-        aliveM3.insert(std::pair(requesterId, std::pair(tmpPost, tmpNext)));
-    }   
+    void sendAckConnection(int dest) {
+        json note;
+        note["status"] = hasToken ? "ok" : "null";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = dest;
+        note["last"] = last;
+        note["next"] = dest;
+        logger->log("send", id, std::to_string(id) + " sent token to " + std::to_string(dest), note);
 
-    void receivedSearchQueue(int requesterId) {
-        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received search queue from " + std::to_string(requesterId));
-        if (!hasFailure) {
-            comm->send(requesterId, "ACK_SEARCH_QUEUE " + std::to_string(id) + " " + std::to_string(position) + " " + std::to_string(next));
-        } else {
-            // std::cout << "hasElection: " << hasElection << "\n";
-            hasElection = true;
+        next = dest;
+        std::string msg = std::to_string(id) + " COMMIT ";
+        for (int i = 1; i < k; i++) {
+            msg += " " + std::to_string(listPredecesers[i]);
         }
+        msg += " " + std::to_string(id) + " " + std::to_string(position + 1);
+        comm->send(dest, msg);
     }
 
     void regeneratedToken() {
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = "null";
+        note["dest"] = "null";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("notice", id, std::to_string(id) + " regenerated token", note);
+
         hasToken = true;
         position = 0;
-        for (int i = 1; i <= config.getTotalNodes(); i++) {
-            if (i == id) {
+        sendRegenerated();
+        cv.notify_one();
+    }
+
+    void sendRegenerated() {
+        json note;
+        note["status"] = "ok";
+        note["error"] = "null";
+        note["source"] = id;
+        note["dest"] = "broadcast";
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("send", id, std::to_string(id) + " broadcast regenerated", note);
+
+        for (int i = 1; i <= totalNodes; i++) {
+            if (i != id) {
+                comm->send(i, std::to_string(id) + " REGENERATED");
+            }
+        }
+    }
+
+    void receiveRegenerated(int source) {
+        if (freetime) {
+            last = source;
+        } else if (position != -1) {
+            last = source;
+        } else {
+            next = last;
+        }
+
+        json note;
+        note["status"] = "null";
+        note["error"] = "null";
+        note["source"] = source;
+        note["dest"] = id;
+        note["last"] = last;
+        note["next"] = next;
+        logger->log("receive", id, std::to_string(id) + " received regenerated from " + std::to_string(source), note);
+    }
+
+    void sendPing() {
+        std::unique_lock<std::mutex> lock(mtxPingPong);
+        while (true) {
+            if (hasToken || predecessor == -1) {
                 continue;
             }
-            comm->send(i, "REGENERATED_TOKEN " + std::to_string(id));
+            comm->send(predecessor, std::to_string(id) + " PING");
+            if (!cv.wait_for(lock, 2 * T_msg, [this]() { return hasPong; })) {
+                lock.unlock();
+                mechanism1();
+                lock.lock();
+            }
+            std::this_thread::sleep_for(T_ping);
         }
-        logger->log("send", "token", id, -1, "", hasToken, "broadcast", std::to_string(id) + " regenerated token");
+    }
+
+    void receivePing(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        sendPong(source);
+    }
+
+    void sendPong(int dest) {
+        comm->send(dest, std::to_string(id) + " PONG");
+    }
+
+    void receivePong(int source) {
+        std::unique_lock<std::mutex> lock(mtxMsg);
+        hasPong = true;
         cv.notify_one();
-    }
-
-    void receivedRegeneratedToken(int requesterId) {
-        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(requesterId) + " regenerated token");
-        if (!hasRequest) {
-            last = requesterId;
-        } else if (position == -1) {
-            next = last;
-        } else {
-            last = requesterId;
-        }
-    }
-
-    void receivedSearchQuestion(int requesterId, int pos) {
-        logger->log("received", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received search question from " + std::to_string(requesterId));
-        if (position < pos) {
-            comm->send(requesterId, "ACK_SEARCH_PREV " + std::to_string(id) + " " + std::to_string(position));
-        }
-    }
-
-    void receivedSearchPrevAck(int requesterId, int pos) {
-        logger->log("received", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received search preack from " + std::to_string(requesterId));
-        aliveM2.insert(std::pair<int, int>{requesterId, pos});
-    }
-
-    void sendAlive(int requesterId) {
-        // std::unique_lock<std::mutex> lock(mtx);
-        comm->send(requesterId, "I_AM_ALIVE " + std::to_string(id));
-        logger->log("send", "token", id, requesterId, std::to_string(id) + " to " + std::to_string(requesterId), hasToken, "sent", std::to_string(id) + " sent i am alive to " + std::to_string(requesterId));
-    }
-
-    void receivedAlive(int senderId) {
-        logger->log("receive", "token", senderId, id, std::to_string(senderId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received i am alive from " + std::to_string(senderId));
-        hasAlive = true;
-        predecessorAlive = senderId;
-        cv.notify_one();
-    }
-
-    void receivedRequest(int requesterId) {
-        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received request from " + std::to_string(requesterId));
-        if (last == id) {
-            next = requesterId;
-            nextUpdate = true;
-            sendCommit(requesterId);
-        } else {
-            sendRequest(last, requesterId);
-        }
-        last = requesterId;
-    }
-
-    void receivedToken() {
-        logger->log("receive", "token", predecessor, id, std::to_string(predecessor) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received token from " + std::to_string(predecessor));
-        hasToken = true;
-        cv.notify_one();
-    }
-
-    void sendRequest(int destId, int requesterId) {
-        std::string message = "REQUEST " + std::to_string(requesterId);
-        comm->send(destId, message);
-        if (id == requesterId) {
-            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId));
-        } else {
-            logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId) + " for " + std::to_string(requesterId));
-        }
-    }
-
-    // ham gui request token khi co loi  
-    void sendRequestFailure(int destId, int requesterId) { 
-        // std::unique_lock<std::mutex> lock(mtx);
-        std::string message = "REQUEST_FAILURE " + std::to_string(requesterId);
-        comm->send(destId, message);
-        logger->log("send", "token", id, destId, std::to_string(id) + " to " + std::to_string(destId), hasToken, "sent", std::to_string(id) + " sent request to " + std::to_string(destId));
-    }
-
-    // ham nhan request khi co loi
-    void receivedRequestFailure(int requesterId) {
-        // std::unique_lock<std::mutex> lock(mtx);
-        next = requesterId;
-        // last = requesterId;
-        logger->log("receive", "token", requesterId, id, std::to_string(requesterId) + " to " + std::to_string(id), hasToken, "received", std::to_string(id) + " received request from " + std::to_string(requesterId));
-        sendCommit(requesterId);
-    }
-
-    void sendToken(int destId) {
-        std::string message = "TOKEN " + std::to_string(id);
-        comm->send(destId, message);
-        logger->log("send", "token", id, next, std::to_string(id) + " to " + std::to_string(next), hasToken, "", std::to_string(id) + " sent token to " + std::to_string(next));
     }
 
     void processMessage(const std::string& message) {
         std::istringstream iss(message);
         std::string msgType;
-        int senderId;
-        iss >> msgType >> senderId;
+        int source;
+        iss >> source >> msgType;
 
         if (msgType == "REQUEST") {
-            receivedRequest(senderId);
-        } else if (msgType == "REQUEST_FAILURE") {
-            receivedRequestFailure(senderId);
+            receivedRequest(source);
+        } else if (msgType == "COMMIT") {
+            std::vector<int> listPredecesers(k);
+            int pos;
+            for (int i = 0; i < k; i++) {
+                iss >> listPredecesers[i];
+            }
+            iss >> pos;
+            receivedCommit(source, listPredecesers, pos);
         } else if (msgType == "TOKEN") {
             receivedToken();
-        } else if (msgType == "COMMIT") {
-            std::vector<int> tmpPredecessors(k);
-            for (int i = 0; i < k; i++) {
-                int tmp;
-                iss >> tmp;
-                tmpPredecessors[i] = tmp; 
-            }
-            int tmpPosition;
-            iss >> tmpPosition;
-            receivedCommit(senderId, tmpPredecessors, tmpPosition);
-        } else if (msgType == "OK") {
-            receivedCommitOk(senderId);
-        } else if (msgType == "ping") {
-            sendPong();
-        } else if (msgType == "pong") {
-            receivedPong();
         } else if (msgType == "ARE_YOU_ALIVE") {
-            sendAlive(senderId);
+            receiveAreYouAlive(source);
         } else if (msgType == "I_AM_ALIVE") {
-            receivedAlive(senderId);
+            receiveIAmAlive(source);
+        } else if (msgType == "REQUEST_M1") {
+            receiveRequestM1(source);
         } else if (msgType == "SEARCH_PREV") {
-            int tmpPos;
-            iss >> tmpPos;
-            receivedSearchQuestion(senderId, tmpPos);
+            int pos;
+            iss >> pos;
+            receiveSearchPrev(source, pos);
         } else if (msgType == "ACK_SEARCH_PREV") {
-            int tmpPos;
-            iss >> tmpPos;
-            receivedSearchPrevAck(senderId, tmpPos);
-        } else if (msgType == "REGENERATED_TOKEN") {
-            receivedRegeneratedToken(senderId);
+            int pos;
+            iss >> pos;
+            receiveAckSearchPrev(source, pos);
         } else if (msgType == "SEARCH_QUEUE") {
-            otherId = senderId;
+            otherId = source;
             iss >> otherCnt;
-            receivedSearchQueue(senderId);
+            receiveSearchQueue(source);
         } else if (msgType == "ACK_SEARCH_QUEUE") {
-            int tmpPos;
-            int tmpNext;
-            iss >> tmpPos >> tmpNext;
-            receivedAckSearchQueue(senderId, tmpPos, tmpNext);
-        } else if (msgType == "DIRECTLY") {
-            receivedRequestDirectly(senderId);
+            int pos;
+            int next;
+            iss >> pos >> next;
+            receivedAckSearchQueue(source, pos, next);
         } else if (msgType == "CONNECTION") {
-            receivedConnection(senderId);
-        }
+            receivedConnection(source);
+        } else if (msgType == "REGENERATED") {
+            receiveRegenerated(source);
+        } else if (msgType == "PING") {
+            receivePing(source);
+        } else if (msgType == "PONG") {
+            receivePong(source);
+        } 
     }
 
-    void listenForMessages() {
+    void receiveMsg() {
         while (true) {
             std::string message;
             if (comm->getMessage(message)) {

@@ -1,6 +1,6 @@
-// #include "naimiTrehel_v1.h"
+#include "naimiTrehel_v1.h"
 #include "naimiTrehel_v2.h"
-// #include "naimiTrehel_v3.h"
+#include "naimiTrehel_v3.h"
 #include <random>
 
 Config config;
@@ -13,8 +13,8 @@ void simulateNode(int id) {
     int port = config.getPort(id);
     std::shared_ptr<Comm> comm = std::make_shared<Comm>(id, port);
     // NaimiTrehelV1 node(id, ip, port, comm);
-    NaimiTrehelV2 node(id, ip, port, comm);
-    // NaimiTrehelV3 node(id, ip, port, 2, comm);
+    // NaimiTrehelV2 node(id, ip, port, comm);
+    NaimiTrehelV3 node(id, ip, port, 2, comm);
     
     // if (id == 3) 
     //     error.setErrorProbability(NETWORK_ERROR, 0.3);
